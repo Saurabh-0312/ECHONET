@@ -25,6 +25,7 @@ const balance = await synapse.payments.balance(TOKENS.USDFC);
 console.log("USDFC Balance:", balance.toString());
 
 app.use('/api',sensorRoutes);
+export default synapse;
 
 
 // ------------------------
