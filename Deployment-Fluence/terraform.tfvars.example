@@ -1,0 +1,7 @@
+# Copy this file to terraform.tfvars and customize the values
+
+service_name  = "echonet-production"
+environment   = "prod"
+memory_limit  = "1Gi"
+cpu_limit     = "1000m"
+service_port  = 8080
