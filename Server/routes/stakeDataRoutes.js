@@ -1,5 +1,5 @@
 import express from 'express';
-import { getStakeData } from '../controllers/stakeDataController.js';
+import { getStakeData } from '../controller/stakeDataController.js';
 
 const Router = express.Router();
 

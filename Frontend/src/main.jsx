@@ -5,10 +5,20 @@ import App from './App.jsx'
 
 import { BrowserRouter } from 'react-router-dom'
 
+import { AuthProvider } from './context/AuthContext.jsx'
+import { EchoProvider } from './context/EchoNetContext'
+import { CidProvider } from './context/CidContext'
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <AuthProvider>
+        <EchoProvider>
+          <CidProvider>
+          <App />
+          </CidProvider>
+        </EchoProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )
