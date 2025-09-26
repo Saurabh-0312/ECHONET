@@ -14,13 +14,15 @@ const checkRegistrationStatus = async (walletAddress) => {
     if (typeof window.ethereum === 'undefined') {
       throw new Error('MetaMask is not installed.');
     }
+    console.log("Checking registration status for wallet:", walletAddress);
+
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     const contract = new ethers.Contract(contractAddress, contractABIData, signer);
     const result = await contract.sensors(walletAddress);
     return result && result.isVerified;
   } catch (error) {
-    console.error("Error checking registration status:", error);
+    console.error("Error checking registration status:", error.message);
     return false;
   }
 };
@@ -45,8 +47,8 @@ export const AuthProvider = ({ children }) => {
       const registrationStatus = await checkRegistrationStatus(address);
       setIsRegistered(registrationStatus);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-  const res = await axios.post(`${backendUrl}/api/ens/reverse`, { address });
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+      const res = await axios.post(`${backendUrl}/api/ens/reverse`, { address });
       if (res.data.success) {
         setEnsName(res.data.ensName);
       } else {
@@ -78,7 +80,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('walletAddress', address);
         setWalletAddress(address);
         setSigner(signerInstance);
-        
+
         navigate('/dashboard');
       } catch (error) {
         console.error("User rejected MetaMask connection request", error.message);
