@@ -4,3 +4,9 @@
 [submodule "Protocol/Polygone/lib/openzeppelin-contracts"]
 	path = Protocol/Polygone/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "Protocol/Polygon/lib/forge-std"]
+	path = Protocol/Polygon/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "Protocol/Polygon/lib/openzeppelin-contracts"]
+	path = Protocol/Polygon/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
