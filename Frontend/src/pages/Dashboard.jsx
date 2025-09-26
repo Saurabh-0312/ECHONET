@@ -5,7 +5,7 @@ import { Routes, Route } from 'react-router-dom';
 
 import Navbar from '../components/dashboard/Navbar.jsx';
 import RegistrationPrompt from '../components/dashboard/RegistrationPrompt.jsx';
-// import Exchange from '../components/exchange/ExchangeCurrency.jsx';
+import Exchange from '../components/exchange/ExchangeCurrency.jsx';
 import UserDashboard from '@/components/dashboard/main/UserDashboard.jsx';
 // import Market from './Market.jsx';
 // import HyperGraphDevice from './HyperGraphDevice.jsx';
@@ -38,8 +38,8 @@ function DashboardPage() {
                             )
                         }
                     />
-                    {/* <Route path="/exchange" element={<Exchange />} />
-                    <Route path="/market" element={<Market />} />
+                    <Route path="/exchange" element={<Exchange />} />
+                    {/* <Route path="/market" element={<Market />} />
                     <Route path="/hypergraph" element={<HyperGraphDevice />} /> */}
                 </Routes>
             </main>
