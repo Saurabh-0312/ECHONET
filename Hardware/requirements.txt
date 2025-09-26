@@ -1,0 +1,8 @@
+sounddevice
+numpy
+torch
+torchaudio
+transformers[audio]
+librosa
+fastapi 
+uvicorn
