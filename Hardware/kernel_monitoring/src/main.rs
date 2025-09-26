@@ -86,7 +86,7 @@ fn get_macos_processes() -> Result<Vec<(i32, PathBuf)>> {
         let parts: Vec<&str> = line.trim().split_whitespace().collect();
         if parts.len() >= 2 {
             if let Ok(pid) = parts[0].parse::<i32>() {
-                let comm = parts[1..].join(" ");
+                let _comm = parts[1..].join(" ");
                 if let Ok(exe_path) = get_executable_path(pid) {
                     processes.push((pid, exe_path));
                 }
