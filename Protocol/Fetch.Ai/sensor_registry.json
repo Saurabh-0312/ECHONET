@@ -1,0 +1,14 @@
+{
+   "_network_services": {
+        "notary_agent_address": "agent1qwmhdqv4smh9c5z82rdx0q09nqchtgyw2ewgl0zr8rqu4jtaq2psxp0n2ya"
+    },
+  "2C:CF:67:C5:6B:63": {
+        "loc_id": "LOC006",
+        "name": "Majhiwada, 9, Pune",
+        "latitude": 23.998321,
+        "longitude": 76.977616,
+        "agent_name": "worker_agent_7",
+        "agent_seed": "abstract wave sunny unlock portion cinnamon about witness juice work awesome spell",
+        "agent_port": 8016
+    }
+}

@@ -1,0 +1,14 @@
+uagents==0.22.8
+Flask
+requests
+ipfshttpclient
+mnemonic
+openai>=1.0.0
+flask-cors
+numpy
+paho-mqtt
+rapidfuzz
+aiohttp
+web3
+python-dotenv
+
