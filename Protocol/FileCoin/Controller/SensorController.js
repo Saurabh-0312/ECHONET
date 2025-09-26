@@ -1,10 +1,10 @@
 import express from "express";
-import synapse from "../app";
+import synapse from "../app.js";
 
 const buffers = {};    // deviceId -> array of sensor data
 const timers = {};     // deviceId -> flush timeout reference
 
-const BATCH_INTERVAL = 1.5*60 * 1000; // 6 seconds (adjust to 2 min in prod)
+const BATCH_INTERVAL = 0.1*60 * 1000; // 6 seconds (adjust to 2 min in prod)
 
 // ------------------------
 // Upload Queue (mutex style)
@@ -107,6 +107,19 @@ const updateSensorData=async(req,res)=>{
 };
 
 const getSensorData=async(req,res)=>{
-    return {};
+    try {
+    const { cid } = req.params;
+
+    if (!cid) return res.status(400).json({ error: "PieceCID is required" });
+
+    console.log(`📥 Retrieving data for PieceCID: ${cid}...`);
+    const retrieved = await synapse.storage.download(cid);
+    const decoded = new TextDecoder().decode(retrieved);
+
+    res.json({ pieceCid: cid, data: JSON.parse(decoded) });
+  } catch (err) {
+    console.error("❌ Error retrieving sensor data:", err.message);
+    res.status(500).json({ error: err.message });
+  }
 }
 export {updateSensorData,getSensorData};

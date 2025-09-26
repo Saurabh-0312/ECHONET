@@ -4,10 +4,10 @@ import bodyParser from "body-parser";
 import { Synapse, RPC_URLS, TOKENS } from "@filoz/synapse-sdk";
 import dotenv from "dotenv";
 import cors from "cors";
-import sensorRoutes from "./Routes/SensorRoutes"
+import sensorRoutes from "./Routes/SensorRoutes.js"
 
 
-dotenv();
+dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
@@ -24,7 +24,7 @@ console.log("✅ Synapse initialized!");
 const balance = await synapse.payments.balance(TOKENS.USDFC);
 console.log("USDFC Balance:", balance.toString());
 
-app.use('/api',sensorRoutes);
+app.use('/api/sensor',sensorRoutes);
 export default synapse;
 
 
