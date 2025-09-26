@@ -153,10 +153,16 @@ check_inter_container_connectivity() {
         
         # Test frontend -> backend connectivity
         log_message "${BLUE}Testing frontend -> backend connectivity...${NC}" "Testing frontend -> backend connectivity..."
-        if docker exec "$FRONTEND_SERVICE" wget --spider -q "http://$BACKEND_SERVICE:$BACKEND_PORT/health" 2>/dev/null; then
+        if docker exec "$FRONTEND_SERVICE" wget --spider -q "http://$BACKEND_SERVICE:$BACKEND_PORT/healthz" 2>/dev/null; then
             log_message "${GREEN}✓ Frontend can reach backend${NC}" "SUCCESS: Frontend can reach backend"
         else
             log_message "${RED}✗ Frontend cannot reach backend${NC}" "ERROR: Frontend cannot reach backend"
+            # Try alternative connectivity tests
+            if docker exec "$FRONTEND_SERVICE" ping -c 1 -W 2 "$BACKEND_SERVICE" >/dev/null 2>&1; then
+                log_message "${YELLOW}⚠ Network connectivity exists but HTTP endpoint may be unreachable${NC}" "WARNING: Can ping backend but HTTP endpoint unreachable"
+            else
+                log_message "${RED}✗ No network connectivity to backend${NC}" "ERROR: No network connectivity to backend"
+            fi
         fi
     else
         log_message "${YELLOW}⚠ Skipping inter-container connectivity test (containers not running)${NC}" "WARNING: Skipping inter-container connectivity test (containers not running)"
