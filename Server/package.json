@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "@ensdomains/ensjs": "^4.0.2",
+    "@filoz/synapse-sdk": "^0.28.0",
+    "@worldcoin/idkit": "^2.4.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
