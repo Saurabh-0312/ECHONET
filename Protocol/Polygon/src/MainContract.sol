@@ -117,7 +117,7 @@ contract MainContract is ReentrancyGuard {
         address sensorAddress = deviceIdToOwner[_deviceId];
         if (sensorAddress == address(0)) revert DeviceIdNotFound();
 
-        uint256 rewardAmount = 10 * (10 ** 18);
+        uint256 rewardAmount = 1 * (10 ** 17); // 0.1 ECHO per reading
 
         // Store the reading in the device's reading array
         deviceReadings[_deviceId].push(Reading({ipfsCID: ipfsCID, timestamp: block.timestamp}));
