@@ -7,7 +7,7 @@ services:
     image: echonet-frontend:latest
     container_name: echonet-frontend
     ports:
-      - "3000:80"
+      - "80:80"
     environment:
       - NODE_ENV=production
       - VITE_BACKEND_URL_DOCKER=http://backend:3001
