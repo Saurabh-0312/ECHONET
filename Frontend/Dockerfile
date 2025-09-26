@@ -25,8 +25,8 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copy built app from build stage
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy standalone nginx configuration (without backend proxy)
-COPY nginx-standalone.conf /etc/nginx/nginx.conf
+# Copy nginx configuration (with backend proxy)
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose port 80
 EXPOSE 80
