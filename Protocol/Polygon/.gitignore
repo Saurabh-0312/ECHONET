@@ -9,6 +9,7 @@ out/
 
 # Docs
 docs/
+./lib
 
 # Ignore vendor libraries we don't want in git. Prefer adding them to the
 # project's package management (submodule, package.json, or remappings) instead
