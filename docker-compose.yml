@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Backend Service
   backend:
@@ -8,15 +6,11 @@ services:
       dockerfile: Dockerfile
     container_name: echonet-backend
     ports:
-      - "3000:3000"
+      - "3001:3001"
     environment:
       - NODE_ENV=production
-      - PORT=3000
     env_file:
       - ./Server/.env
-    volumes:
-      - ./Server:/app
-      - /app/node_modules
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "node", "healthcheck.js"]

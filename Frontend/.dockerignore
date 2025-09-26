@@ -25,8 +25,7 @@ Thumbs.db
 .git/
 .gitignore
 
-# Environment variables
-.env
+# Environment variables (keep .env for build, exclude others)
 .env.local
 .env.development.local
 .env.test.local

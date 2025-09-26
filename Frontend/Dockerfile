@@ -7,13 +7,13 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (including dev dependencies needed for build)
+RUN npm ci
 
-# Copy source code
+# Copy source code (including .env file)
 COPY . .
 
-# Build the app
+# Build the app (Vite will pick up environment variables from .env file)
 RUN npm run build
 
 # Stage 2: Serve with Nginx
