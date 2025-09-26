@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { CheckCircle, ArrowRight, Wallet, Shield } from 'lucide-react';
 
-import Scanner from "../components/wordCoin/Scanner.jsx"; 
+
 
 // --- Helper Components for UI ---
 const MetaMaskIcon = () => (
@@ -92,13 +92,7 @@ function AuthPage() {
             {isScannerStep && (
               <div className="text-center">
                 <h2 className="text-xl font-semibold mb-4">Scan to Authenticate</h2>
-                <Scanner 
-                  onSuccess={(scannedData) => {
-                    console.log("✅ Scanner Success:", scannedData);
-                    // You can set googleUser manually here to trigger next step
-                    setGoogleUser({ name: scannedData.userName || "Scanned User" });
-                  }}
-                />
+                
               </div>
             )}
 
