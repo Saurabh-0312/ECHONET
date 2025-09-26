@@ -13,7 +13,6 @@ const verifyWorldcoin = async (req, res) => {
             app_id,
             action);
         
-
         console.log("Worldcoin verification result:", verifyRes);
 
         if (verifyRes.success) {
