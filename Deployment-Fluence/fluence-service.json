@@ -1,0 +1,1 @@
+{"config":{"cpu":"1000m","memory":"1Gi"},"environment":{"NODE_ENV":"prod","PORT":8080},"name":"echonet-production","tags":{"environment":"prod","managed_by":"terraform","project":"echonet"},"version":"1.0.0"}

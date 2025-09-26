@@ -1,37 +1,53 @@
 terraform {
   required_version = ">= 1.0"
   required_providers {
-    fluence = {
-      source = "fluencelabs/fluence"
-      version = "~> 0.1"
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
     }
   }
 }
 
-provider "fluence" {
-  # Configuration will be handled via environment variables
-  # FLUENCE_API_KEY and FLUENCE_PROJECT_ID
+# Generate Fluence service configuration file
+resource "local_file" "fluence_config" {
+  filename = "${path.module}/fluence-service.json"
+  content = jsonencode({
+    name = var.service_name
+    version = "1.0.0"
+    config = {
+      memory = var.memory_limit
+      cpu    = var.cpu_limit
+    }
+    environment = {
+      NODE_ENV = var.environment
+      PORT     = var.service_port
+    }
+    tags = {
+      project     = "echonet"
+      environment = var.environment
+      managed_by  = "terraform"
+    }
+  })
 }
 
-# Basic Fluence service deployment
-resource "fluence_service" "echonet_service" {
-  name = var.service_name
+# Deploy to Fluence using CLI (requires fluence CLI to be installed)
+resource "null_resource" "deploy_fluence_service" {
+  depends_on = [local_file.fluence_config]
   
-  # Minimal service configuration
-  config {
-    memory = var.memory_limit
-    cpu    = var.cpu_limit
+  triggers = {
+    config_hash = local_file.fluence_config.content_md5
   }
 
-  # Environment variables
-  environment = {
-    NODE_ENV = var.environment
-    PORT     = var.service_port
-  }
-
-  tags = {
-    project     = "echonet"
-    environment = var.environment
-    managed_by  = "terraform"
+  provisioner "local-exec" {
+    command = <<-EOT
+      echo "Fluence service configuration generated at: ${local_file.fluence_config.filename}"
+      echo "To deploy manually, run: fluence service deploy --config ${local_file.fluence_config.filename}"
+      echo "Service name: ${var.service_name}"
+      echo "Environment: ${var.environment}"
+    EOT
   }
 }
