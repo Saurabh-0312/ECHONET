@@ -1,6 +1,6 @@
 # ======================================================================================
-# ECHONET - STANDALONE DEVICE NODE SCRIPT (v.FINAL)
-# This single file contains all logic for the device agent.
+# ECHONET - UNIFIED NODE WITH REAL MICROPHONE INPUT (v.COMPLETE)
+# This single file captures live audio, publishes it, and runs the agent logic.
 # HARDCODE your credentials and URLs in the configuration section below.
 # ======================================================================================
 
@@ -12,13 +12,17 @@ import asyncio
 import hashlib
 import json
 import math
-from datetime import datetime, timezone, timedelta
+import time
+import random
+from datetime import datetime, timezone
 from typing import List, Dict
+
+import sounddevice as sd
+import numpy as np
 
 import requests
 import aiohttp
 from getmac import get_mac_address as gma
-
 
 from uagents import Agent, Context, Model, Protocol
 from uagents.crypto import Identity
@@ -29,28 +33,25 @@ from mnemonic import Mnemonic
 # --- HARDCODED CONFIGURATION ---
 # ❗️ EDIT THE VALUES IN THIS SECTION ❗️
 # ======================================================================================
-
-# 1. The public URL of your central Flask server (the one running api.py)
-API_BASE_URL = "https://fetch-dev.onrender.com" # e.g., "https://echonet-api.onrender.com"
-
-# 2. Your Agentverse API Key from https://agentverse.ai
-AGENTVERSE_API_KEY = "eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjE3NjA5ODc2NzcsImlhdCI6MTc1ODM5NTY3NywiaXNzIjoiZmV0Y2guYWkiLCJqdGkiOiI4ZTM0YzM2OGI3YmQ2MDY1ZWM3ZjkwMTgiLCJzY29wZSI6ImF2Iiwic3ViIjoiYjIxNjVjZTJjYmM4ODQ4ZDU0MjY4NjA1Yzc2Y2YzZTUzYmY3MmZkM2YzNzAxZmJjIn0.kYYZgca83_v7WqYmfFEGn6Ki7iEmRyWwfZSsg4Vak4ESDUOCWkajNBuBbZAXoy5VfohJVCR18O2AUe_3kRa0PywGpL_E-hqMJUvod5K_lVW0NDqpVRERHknGT8e8d-vLgYkRtnP-IFSkI2Npn2Rmv7H-WMmmty8U7JAy0P-Zvq9TSq8UrpDD3Hg5gikipnRL4RxarTgQNY-3ZbYTXweTPE6-QTYzjE9IB8rLFdmun_P6y1_IkjG0pleaYpZz-8Z1wohlAX52vTB8nl-gWVOWXv7tvF47qk2Q08-W96zWLKGsIXF4YZ2Ol0BcErY--OQ7VhxJQZF5tpgf1NTlJSiy-w"
-
-# 3. The URL for your external data ingestion API (the one that receives enriched data)
+API_BASE_URL = "https://fetch-dev.onrender.com"
+AGENTVERSE_API_KEY = "YOUR_AGENTVERSE_API_KEY_HERE"
 EXTERNAL_INGEST_API_URL = "http://82.177.167.151:5001/ingest"
-
-# 4. The URL for your raw data collector API
 RAW_DATA_COLLECTOR_URL = "http://82.177.167.151:3001/api/sensor"
-
-# 5. MQTT Broker Configuration (usually does not need to be changed)
 MQTT_BROKER = "broker.hivemq.com"
 MQTT_PORT = 1883
 MQTT_TOPIC_PREFIX = "echonet/sensors"
 
 # ======================================================================================
+# --- Audio Capture Settings ---
+# ======================================================================================
+SAMPLERATE = 48000
+BLOCKSIZE = 1024
+CHANNELS = 1
+latest_db_values = [] # Shared list to store recent dB readings
+
+# ======================================================================================
 # --- Data Models (Schemas) ---
 # ======================================================================================
-
 class SensorData(Model):
     device_id: str
     timestamp: str
@@ -82,7 +83,6 @@ class FactCandidate(Model):
 # ======================================================================================
 # --- Consensus Logic ---
 # ======================================================================================
-
 REFERENCE_DISTANCE = 1.0
 NOISE_FLOOR_THRESHOLD = 20
 CALIBRATION_MARGIN = 5
@@ -107,21 +107,15 @@ class SmartConsensus:
     def validate_event(self, request_data: dict, peer_sensor_data: dict, peer_agent_config: dict) -> bool:
         if peer_sensor_data['decibel'] < NOISE_FLOOR_THRESHOLD:
             return False
-        
         orchestrator_location = request_data['location']
         peer_location = {"latitude": peer_agent_config["latitude"], "longitude": peer_agent_config["longitude"]}
-        distance = haversine_distance(
-            orchestrator_location['latitude'], orchestrator_location['longitude'],
-            peer_location['latitude'], peer_location['longitude']
-        )
+        distance = haversine_distance(orchestrator_location['latitude'], orchestrator_location['longitude'], peer_location['latitude'], peer_location['longitude'])
         expected_db = expected_decibel_at_distance(request_data['decibel'], distance)
-        
         return peer_sensor_data['decibel'] >= expected_db - CALIBRATION_MARGIN
 
 # ======================================================================================
-# --- Main Application Logic ---
+# --- Main Application & Agent Logic ---
 # ======================================================================================
-
 message_queue = queue.Queue()
 NOTARY_AGENT_ADDRESS = None
 
@@ -135,37 +129,9 @@ def read_registry():
         print(f"❌ CRITICAL: Could not fetch registry from API: {e}. Exiting.")
         sys.exit(1)
 
-#--- Agent & Peer Configuration ---
-try:
-    #MAC_ADDRESS = gma(interface="wlan0") or gma(interface="eth0") or gma()=
-    MAC_ADDRESS="00:1A:2B:3C:4D:5E"
+# --- Agent & Peer Configuration is done in the __main__ block ---
 
-    if not MAC_ADDRESS: raise ValueError("getmac returned empty.")
-    print(f"✅ Automatically detected MAC Address: {MAC_ADDRESS}")
-except Exception as e:
-    print(f"⚠️ Could not automatically detect MAC address ({e}).")
-    if len(sys.argv) > 1:
-        MAC_ADDRESS = sys.argv[1]
-        print(f"✅ Using MAC address from command line: {MAC_ADDRESS}")
-    else:
-        print("❌ Error: No MAC address found and none provided. Exiting.")
-        sys.exit(1)
-# # Hardcoded for testing purposes
-# MAC_ADDRESS = "00:1A:2B:3C:4D:5E" 
-# print(f"✅ Using hardcoded MAC Address for testing: {MAC_ADDRESS}")
-
-ALL_CONFIGS = read_registry()
-if MAC_ADDRESS not in ALL_CONFIGS:
-    print(f"❌ CRITICAL: MAC Address {MAC_ADDRESS} not found in the registry. Please register it via the web UI. Exiting.")
-    sys.exit(1)
-
-CONFIG = ALL_CONFIGS[MAC_ADDRESS]
-AGENT_NAME = CONFIG['agent_name']
-
-# --- Agent Setup ---
-agent = Agent(name=AGENT_NAME, seed=CONFIG["agent_seed"], mailbox=f"{AGENTVERSE_API_KEY}@agentverse.ai")
-
-# --- State & Helpers ---
+# --- Agent State & Helper functions ---
 LOCAL_SENSOR_STATE = {}
 SENSOR_FAILURE_COUNTS = {}
 FAILURE_THRESHOLD = 5
@@ -175,25 +141,15 @@ GRID_SIZE = 0.1
 smart_consensus = SmartConsensus()
 QUORUM_RATIO = 0.45
 
-seed_bytes = Mnemonic("english").to_seed(CONFIG["agent_seed"])
-private_key = PrivateKey(seed_bytes[:32])
-public_key = private_key.public_key
-
 def get_digest(data: dict) -> bytes: return hashlib.sha256(json.dumps(data, sort_keys=True).encode()).digest()
 def export_public_key_hex(pubkey: PublicKey) -> str: return pubkey._verifying_key.to_string().hex()
 
 def cleanup_sensor_and_agent(mac_address: str):
-    print(f"CRITICAL: Sensor with MAC {mac_address} exceeded failure threshold.")
-    print(f"--> Requesting on-chain stake slash from the API server...")
+    print(f"CRITICAL: Sensor {mac_address} exceeded failure threshold. Requesting slash...")
     try:
-        response = requests.post(
-            f"{API_BASE_URL}/request-slash",
-            json={"mac_address": mac_address},
-            timeout=20
-        )
+        response = requests.post(f"{API_BASE_URL}/request-slash", json={"mac_address": mac_address}, timeout=20)
         response.raise_for_status()
-        api_ack = response.json()
-        print(f"--> API Acknowledged Slash Request: {api_ack.get('message')} (Tx: {api_ack.get('tx_hash')})")
+        print(f"--> API Acknowledged Slash Request: {response.json().get('message')}")
     except requests.exceptions.RequestException as e:
         print(f"--> CRITICAL: Failed to send slash request to API: {e}")
 
@@ -203,10 +159,8 @@ def get_local_peer_group(event_location: dict) -> set:
     event_grid_id = (math.floor(event_location["latitude"] / GRID_SIZE), math.floor(event_location["longitude"] / GRID_SIZE))
     for mac, cfg in all_configs.items():
         if not mac.startswith('_'):
-            peer_grid_id = (math.floor(cfg["latitude"] / GRID_SIZE), math.floor(cfg["longitude"] / GRID_SIZE))
-            if peer_grid_id == event_grid_id:
-                peer_address = str(Identity.from_seed(cfg["agent_seed"], 0).address)
-                local_peers.add(peer_address)
+            if (math.floor(cfg["latitude"] / GRID_SIZE), math.floor(cfg["longitude"] / GRID_SIZE)) == event_grid_id:
+                local_peers.add(str(Identity.from_seed(cfg["agent_seed"], 0).address))
     return local_peers
 
 async def final_actions_after_consensus(ctx: Context, event_info: dict, location: dict):
@@ -252,15 +206,14 @@ async def final_actions_after_consensus(ctx: Context, event_info: dict, location
 
 validation_protocol = Protocol("WorkerAgentValidation")
 
-async def handle_sensor_data(ctx: Context, sender: str, msg: SensorData):
-    global LOCAL_SENSOR_STATE
+async def handle_sensor_data(ctx: Context, sender: str, msg: SensorData, agent_instance: Agent, config: dict, private_key: PrivateKey, public_key: PublicKey):
+    global LOCAL_SENSOR_STATE, pending_events
     LOCAL_SENSOR_STATE = msg.dict()
     
     all_configs = read_registry()
     if msg.device_id not in all_configs: return
         
-    registered_location = {"latitude": all_configs[msg.device_id]["latitude"], "longitude": all_configs[msg.device_id]["longitude"]}
-    
+    registered_location = {"latitude": config["latitude"], "longitude": config["longitude"]}
     predicted_class, confidence = "ambient_noise", 0.99
     ctx.logger.info(f"Using hardcoded ML result: class='{predicted_class}', confidence={confidence}")
     
@@ -280,12 +233,12 @@ async def handle_sensor_data(ctx: Context, sender: str, msg: SensorData):
     validation_request = ValidationRequest(**request_data, public_key=export_public_key_hex(public_key), signature=private_key.sign(get_digest(request_data)).hex())
 
     for peer_address in event_local_group:
-        if peer_address != str(agent.address):
+        if peer_address != str(agent_instance.address):
             await ctx.send(peer_address, validation_request)
 
 @validation_protocol.on_message(model=ValidationRequest, replies=set())
-async def handle_validation_request(ctx: Context, sender: str, msg: ValidationRequest):
-    is_plausible = smart_consensus.validate_event(msg.dict(), LOCAL_SENSOR_STATE, CONFIG) if LOCAL_SENSOR_STATE else False
+async def handle_validation_request(ctx: Context, sender: str, msg: ValidationRequest, config: dict, private_key: PrivateKey, public_key: PublicKey):
+    is_plausible = smart_consensus.validate_event(msg.dict(), LOCAL_SENSOR_STATE, config) if LOCAL_SENSOR_STATE else False
     response_data = {"event_id": msg.event_id, "validated": is_plausible}
     await ctx.send(sender, ValidationResponse(**response_data, public_key=export_public_key_hex(public_key), signature=private_key.sign(get_digest(response_data)).hex()))
 
@@ -308,7 +261,7 @@ async def handle_validation_response(ctx: Context, sender: str, msg: ValidationR
         
         positive_responses = sum(1 for res in event["responses"] if res.validated)
         
-        if positive_responses >= math.ceil(num_peers_in_group * QUORUM_RATIO):
+        if num_peers_in_group > 0 and positive_responses >= math.ceil(num_peers_in_group * QUORUM_RATIO):
             ctx.logger.info(f"CONSENSUS REACHED for event {msg.event_id}.")
             await final_actions_after_consensus(ctx, event, registered_location)
             del pending_events[msg.event_id]
@@ -321,35 +274,123 @@ async def handle_validation_response(ctx: Context, sender: str, msg: ValidationR
                 SENSOR_FAILURE_COUNTS[mac_address] = 0
             del pending_events[msg.event_id]
 
-# --- MQTT Client Logic ---
+# ======================================================================================
+# --- Real-time Audio Capture & Publishing ---
+# ======================================================================================
+def audio_callback(indata, frames, time_info, status):
+    global latest_db_values
+    if status:
+        print(status, file=sys.stderr)
+    rms = np.sqrt(np.mean(indata**2))
+    db = 20 * np.log10(rms + 1e-7) + 90
+    latest_db_values.append(db)
+    if len(latest_db_values) > 50:
+        latest_db_values.pop(0)
+
+def run_mic_and_publish_thread(mac_address: str):
+    publisher_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, f"mic_publisher_{mac_address}")
+    publisher_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    publisher_client.loop_start()
+    
+    topic = f"{MQTT_TOPIC_PREFIX}/{mac_address}"
+    print(f"🎤 Real-time audio publisher started. Publishing to topic: {topic}")
+
+    def publish_loop():
+        while True:
+            time.sleep(5)
+            if latest_db_values:
+                avg_db = sum(latest_db_values) / len(latest_db_values)
+                payload = {
+                    "device_id": mac_address,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "decibel": round(float(avg_db), 2)
+                }
+                json_payload = json.dumps(payload)
+                publisher_client.publish(topic, json_payload)
+                print(f"🎤 LIVE MIC ({mac_address}): Published average dB reading {payload['decibel']:.2f} dB")
+    
+    try:
+        with sd.InputStream(samplerate=SAMPLERATE, blocksize=BLOCKSIZE, channels=CHANNELS, callback=audio_callback):
+            publish_loop()
+    except Exception as e:
+        print(f"\n❌ MICROPHONE ERROR: {e}")
+        
+# ======================================================================================
+# --- Agent's MQTT Listener ---
+# ======================================================================================
 def on_connect(client, userdata, flags, rc, properties):
-    if rc == 0: client.subscribe(f"{MQTT_TOPIC_PREFIX}/{MAC_ADDRESS}"); print(f"✅ MQTT client subscribed to topic for {MAC_ADDRESS}")
-    else: print(f"❌ Failed to connect to MQTT broker, return code {rc}")
+    mac_address = userdata["mac_address"]
+    if rc == 0:
+        client.subscribe(f"{MQTT_TOPIC_PREFIX}/{mac_address}")
+        print(f"✅ Agent's MQTT listener subscribed to topic for {mac_address}")
+    else:
+        print(f"❌ Failed to connect MQTT listener, return code {rc}")
 
 def on_message(client, userdata, msg):
-    try: message_queue.put(SensorData(**json.loads(msg.payload.decode())))
-    except Exception as e: print(f"Error processing MQTT message: {e}")
+    try:
+        message_queue.put(SensorData(**json.loads(msg.payload.decode())))
+    except Exception as e:
+        print(f"Error processing incoming MQTT message: {e}")
 
-def start_mqtt_client():
-    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, f"device_node_mqtt_{MAC_ADDRESS}")
-    client.on_connect, client.on_message = on_connect, on_message
-    client.connect(MQTT_BROKER, MQTT_PORT, 60)
-    client.loop_forever()
+def start_mqtt_listener_thread(mac_address: str):
+    user_data = {"mac_address": mac_address}
+    listener_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"agent_listener_{mac_address}", userdata=user_data)
+    listener_client.on_connect = on_connect
+    listener_client.on_message = on_message
+    listener_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+    listener_client.loop_forever()
 
-@agent.on_interval(period=0.5)
-async def process_mqtt_queue(ctx: Context):
-    if not message_queue.empty():
-        try:
-            sensor_data = message_queue.get_nowait()
-            ctx.logger.info(f"Pulled sensor data from MQTT queue for device: {sensor_data.device_id}")
-            await handle_sensor_data(ctx, agent.address, sensor_data)
-        except queue.Empty: pass
-        except Exception as e: ctx.logger.error(f"Error processing item from queue: {e}")
-
-# --- Main Execution ---
+# ======================================================================================
+# --- Main Execution Block ---
+# ======================================================================================
 if __name__ == "__main__":
+    try:
+        MAC_ADDRESS = gma(interface="wlan0") or gma(interface="eth0") or gma()
+        if not MAC_ADDRESS: raise ValueError("getmac returned empty.")
+        print(f"✅ Automatically detected MAC Address: {MAC_ADDRESS}")
+    except Exception:
+        MAC_ADDRESS = "00:1A:2B:3C:4D:5E"
+        print(f"⚠️ Could not detect MAC. Using hardcoded fallback: {MAC_ADDRESS}")
+
+    ALL_CONFIGS = read_registry()
+    if MAC_ADDRESS not in ALL_CONFIGS:
+        print(f"❌ CRITICAL: MAC Address {MAC_ADDRESS} not found in registry. Exiting.")
+        sys.exit(1)
+
+    CONFIG = ALL_CONFIGS[MAC_ADDRESS]
+    AGENT_NAME = CONFIG['agent_name']
+    agent = Agent(name=AGENT_NAME, seed=CONFIG["agent_seed"], mailbox=f"{AGENTVERSE_API_KEY}@agentverse.ai")
+
+    seed_bytes = Mnemonic("english").to_seed(CONFIG["agent_seed"])
+    private_key = PrivateKey(seed_bytes[:32])
+    public_key = private_key.public_key
+
+    # Pass necessary context to message handlers
+    agent.on_message = lambda ctx, sender, msg: handle_sensor_data(ctx, sender, msg, agent, CONFIG, private_key, public_key)
+    validation_protocol.on_message(model=ValidationRequest, replies=set())(lambda ctx, sender, msg: handle_validation_request(ctx, sender, msg, CONFIG, private_key, public_key))
+    validation_protocol.on_message(model=ValidationResponse, replies=set())(handle_validation_response)
+
+    @agent.on_interval(period=0.5)
+    async def process_mqtt_queue(ctx: Context):
+        if not message_queue.empty():
+            try:
+                sensor_data = message_queue.get_nowait()
+                ctx.logger.info(f"Pulled sensor data from MQTT queue for device: {sensor_data.device_id}")
+                await handle_sensor_data(ctx, agent.address, sensor_data, agent, CONFIG, private_key, public_key)
+            except queue.Empty: pass
+            except Exception as e: ctx.logger.error(f"Error processing item from queue: {e}")
+
     agent.include(validation_protocol)
-    print("🚀 Starting device node...")
-    threading.Thread(target=start_mqtt_client, daemon=True).start()
+    
+    print("🚀 Starting all components...")
+    
+    # Start the Microphone Capture & MQTT Publishing thread
+    mic_thread = threading.Thread(target=run_mic_and_publish_thread, args=(MAC_ADDRESS,), daemon=True)
+    mic_thread.start()
+    
+    # Start the Agent's MQTT Listener thread
+    listener_thread = threading.Thread(target=start_mqtt_listener_thread, args=(MAC_ADDRESS,), daemon=True)
+    listener_thread.start()
+
     print(f"✅ Agent '{AGENT_NAME}' running for MAC {MAC_ADDRESS} with address: {agent.address}")
     agent.run()
