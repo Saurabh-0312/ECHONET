@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DeviceList from "../components/marketplace/DeviceList.jsx";
 import DataList from "../components/marketplace/DataList.jsx";
 import { ChevronDown } from "lucide-react";
@@ -7,11 +7,21 @@ const Market = () => {
   const [selectedMarketplace, setSelectedMarketplace] = useState("data");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [loadingId, setLoadingId] = useState(null);
+  const [subscribedItems, setSubscribedItems] = useState(new Set());
+  const [purchaseSuccess, setPurchaseSuccess] = useState(null);
 
   const marketplaceOptions = [
     { value: "devices", label: "Devices" },
     { value: "data", label: "Data Streams" },
   ];
+
+  // useEffect to handle successful purchases
+  useEffect(() => {
+    if (purchaseSuccess) {
+      setSubscribedItems(prev => new Set([...prev, purchaseSuccess]));
+      setPurchaseSuccess(null);
+    }
+  }, [purchaseSuccess]);
 
   const handleBuyData = async (dataPoint) => {
     setLoadingId(dataPoint.id);
@@ -39,7 +49,7 @@ const Market = () => {
         console.log("Purchase API Response:", result);
 
         if (result.success) {
-          alert(`Purchase successful: ${JSON.stringify(result)}`);
+          setPurchaseSuccess(dataPoint.id);
           success = true;
         } else {
           attempts++;
@@ -97,7 +107,7 @@ const Market = () => {
         {/* Marketplace Content */}
         <div className="bg-neutral-950 p-6 sm:p-10 rounded-2xl shadow-xl border border-gray-700">
           {selectedMarketplace === "devices" && <DeviceList />}
-          {selectedMarketplace === "data" && <DataList handleBuyData={handleBuyData} loadingId={loadingId} />}
+          {selectedMarketplace === "data" && <DataList handleBuyData={handleBuyData} loadingId={loadingId} subscribedItems={subscribedItems} />}
         </div>
       </div>
     </div>

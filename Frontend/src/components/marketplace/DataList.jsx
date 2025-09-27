@@ -3,7 +3,7 @@ import decibelData from "../../DummyData/decibelData.json";
 import { BsSoundwave } from "react-icons/bs";
 import { FaUserAstronaut } from "react-icons/fa";
 
-const DataCard = ({ dataPoint, handleBuyData, loading }) => (
+const DataCard = ({ dataPoint, handleBuyData, loading, isSubscribed }) => (
   <div className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all duration-200">
     {/* Header */}
     <div className="flex justify-between items-center mb-4">
@@ -35,13 +35,15 @@ const DataCard = ({ dataPoint, handleBuyData, loading }) => (
 
     {/* Purchase Button */}
     <button
-      onClick={() => handleBuyData(dataPoint)}
-      className={`w-full mt-6 bg-black text-white font-medium py-2 rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${
-        loading
-          ? "opacity-60 cursor-not-allowed"
-          : "hover:bg-gray-800"
+      onClick={() => !isSubscribed && handleBuyData(dataPoint)}
+      className={`w-full mt-6 font-medium py-2 rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${
+        isSubscribed
+          ? "bg-green-600 text-white cursor-default"
+          : loading
+          ? "bg-black text-white opacity-60 cursor-not-allowed"
+          : "bg-black text-white hover:bg-gray-800"
       }`}
-      disabled={loading}
+      disabled={loading || isSubscribed}
     >
       {loading ? (
         <>
@@ -67,6 +69,8 @@ const DataCard = ({ dataPoint, handleBuyData, loading }) => (
           </svg>
           Processing...
         </>
+      ) : isSubscribed ? (
+        "✓ Subscribed"
       ) : (
         "Purchase Data"
       )}
@@ -74,7 +78,7 @@ const DataCard = ({ dataPoint, handleBuyData, loading }) => (
   </div>
 );
 
-const DataList = ({ handleBuyData, loadingId }) => (
+const DataList = ({ handleBuyData, loadingId, subscribedItems }) => (
   <div className="w-full max-w-6xl mx-auto">
     <h2 className="text-3xl font-bold text-center text-gray-200 mb-8">
       Data Stream Marketplace
@@ -86,6 +90,7 @@ const DataList = ({ handleBuyData, loadingId }) => (
           dataPoint={item}
           handleBuyData={handleBuyData}
           loading={loadingId === item.id}
+          isSubscribed={subscribedItems?.has(item.id)}
         />
       ))}
     </div>
