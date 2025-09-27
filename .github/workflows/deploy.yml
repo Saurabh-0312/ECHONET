@@ -17,10 +17,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH key
+      - name: Decode and Setup SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/cloud_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > ~/.ssh/cloud_rsa
           chmod 600 ~/.ssh/cloud_rsa
           ssh-keyscan -H 82.177.167.151 >> ~/.ssh/known_hosts
 
