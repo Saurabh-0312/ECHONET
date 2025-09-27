@@ -17,19 +17,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Decode and Setup SSH key
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add remote server to known_hosts
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > ~/.ssh/cloud_rsa
-          chmod 600 ~/.ssh/cloud_rsa
           ssh-keyscan -H 82.177.167.151 >> ~/.ssh/known_hosts
-          # show fingerprint of the provided key to help debugging (not secret)
-          ssh-keygen -lf ~/.ssh/cloud_rsa || true
 
       - name: Deploy to server
         run: |
-          # use IdentitiesOnly to force ssh to use the provided key (avoids agent/conflicts)
-          ssh -i ~/.ssh/cloud_rsa -o IdentitiesOnly=yes ubuntu@82.177.167.151 '
+          ssh ubuntu@82.177.167.151 '
             set -e
             cd ECHONET &&
             git fetch origin &&
@@ -40,11 +39,13 @@ jobs:
 
       - name: Verify deployment
         run: |
-          ssh -i ~/.ssh/cloud_rsa -o IdentitiesOnly=yes ubuntu@82.177.167.151 '
+          ssh ubuntu@82.177.167.151 '
             sudo docker compose ps
           '
 
       - name: Cleanup SSH key
         if: always()
         run: |
-          rm -f ~/.ssh/cloud_rsa
+          # The ssh-agent action handles cleanup, but if you had manual keys:
+          # rm -f ~/.ssh/cloud_rsa
+          echo "SSH key cleanup is handled by ssh-agent action."
