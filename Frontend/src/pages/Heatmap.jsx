@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-
-// Note: Leaflet CSS/JS are loaded from CDN inside this component when it mounts.
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 function Heatmap() {
   const mapRef = useRef(null);
   const [data, setData] = useState([]);
@@ -10,24 +10,14 @@ function Heatmap() {
   const searchMarkerRef = useRef(null);
 
   useEffect(() => {
-    // load leaflet css
-    const css = document.createElement('link');
-    css.rel = 'stylesheet';
-    css.href = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css';
-    document.head.appendChild(css);
-
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js';
-    script.onload = () => initialize();
-    document.body.appendChild(script);
+    // Initialize the map directly since Leaflet is now properly imported
+    initialize();
 
     return () => {
       // cleanup leaflet elements if any
       if (mapRef.current && mapRef.current.remove) {
         mapRef.current.remove();
       }
-      document.head.removeChild(css);
-      document.body.removeChild(script);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -49,12 +39,9 @@ function Heatmap() {
     const heatmapData = await fetchData();
 
     // Create map
-    // eslint-disable-next-line no-undef
-    const L = window.L;
     mapRef.current = L.map('map').setView([20, 0], 2);
 
     // Add dark tiles (CartoDB Dark Matter)
-    // eslint-disable-next-line no-undef
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
       maxZoom: 19
@@ -65,8 +52,7 @@ function Heatmap() {
   }
 
   function addMarkers(points) {
-    const L = window.L;
-    if (!L || !mapRef.current) return;
+    if (!mapRef.current) return;
 
     points.forEach(point => {
       const color = point.value > 100 ? 'red' :
@@ -115,7 +101,6 @@ function Heatmap() {
     if (searchMarkerRef.current) {
       searchMarkerRef.current.remove();
     }
-    const L = window.L;
     searchMarkerRef.current = L.marker([lat, lng]).addTo(mapRef.current).bindPopup(`<b>Search Location</b><br/>Lat: ${lat}<br/>Lng: ${lng}`).openPopup();
   }
 
@@ -134,7 +119,6 @@ function Heatmap() {
 
     if (nearest) {
       mapRef.current.setView([nearest.lat, nearest.lng], 12);
-      const L = window.L;
       L.popup()
         .setLatLng([nearest.lat, nearest.lng])
         .setContent(`<b>Nearest Device</b><br/>Device: ${nearest.device_id}<br/>Noise: ${nearest.value.toFixed(1)} dB<br/>Distance: ${(minDistance * 111).toFixed(2)} km`)
