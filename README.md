@@ -19,7 +19,8 @@ ECHONET leverages a distributed microservice architecture deployed on **Fluence 
 │  │  ├── WorldCoin Identity Verification Service       │    │
 │  │  ├── Staking & Rewards Service                     │    │
 │  │  ├── IPFS/Filecoin Storage Service (CID)          │    │
-│  │  └── HyperGraph Analytics Service                  │    │
+│  │  ├── HyperGraph Analytics Service                  │    │
+│  │  └── Python Heatmap Service                        │    │
 │  └─────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────┘
             ↕️ P2P Communication & Service Discovery
@@ -50,6 +51,7 @@ ECHONET leverages a distributed microservice architecture deployed on **Fluence 
 │   │   ├── CidRoutes.js         # IPFS content addressing
 │   │   └── hyperGraphSensor.js  # Analytics & querying
 │   └── controller/     # Business logic for each service
+├── Python-microservice/ # Python microservice for heatmap data
 ├── Hardware/           # IoT firmware, sensor scripts, and device code
 ├── Protocol/           # Multi-blockchain protocol implementations
 │   ├── Fetch.AI/       # Autonomous agent services
