@@ -3,8 +3,8 @@ import SensorCard from './SensorCard';
 
 function LiveFeed({ sensors, onDelete }) {
     return (
-        <div className="mt-8">
-            <div className="bg-black border border-white/20 rounded-lg shadow-lg p-6">
+        <div className="mt-8 bg-black-900/50 border-white/25 rounded-2xl backdrop-blur-sm shadow-[0_8px_32px_rgba(255,255,255,0.15)] hover:border-white/30 transition-all duration-300">
+            <div className=" border border-white/20 rounded-lg shadow-lg p-6">
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center">
                         <i className="fas fa-broadcast-tower text-2xl text-green-400 mr-3"></i>

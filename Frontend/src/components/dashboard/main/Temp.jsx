@@ -5,7 +5,7 @@ import BottomLeft from './panelComponents/BottomLeft';
 import BottomRight from './panelComponents/BottomRight';
 
 const Panel = ({ children, className = '', title }) => (
-    <div className={`bg-black-900/50 w-full min-h-[220px] border border-white/25 rounded-2xl backdrop-blur-sm p-6 shadow-[0_8px_32px_rgba(255,255,255,0.15)] hover:border-white/30 transition-all duration-300 ${className}`}>
+    <div className={`w-full min-h-[220px] bg-black-900/50 border border-white/25 rounded-2xl backdrop-blur-sm p-6 shadow-[0_8px_32px_rgba(255,255,255,0.15)] hover:border-white/30 transition-all duration-300 ${className}`}>
         {title && <h2 className="text-xl font-semibold text-gray-200 mb-4 ">{title}</h2>}
         <div className="w-full min-h-[120px] h-full flex items-center justify-center text-gray-500">
             {children || <span className="text-sm">Content for {title}</span>}

@@ -15,7 +15,7 @@ async function notifySmartContract(pieceCid, deviceId) {
     }
 
     try {
-        const CONTRACT_ADDRESS = "0xc40dFe3F5d21743275db79586F2880415e77fc9a";
+        const CONTRACT_ADDRESS = import.meta.env.VITE_MAIN_CONTRACT_ADDRESS;
         const CONTRACT_ABI = RegisterABI.output.abi;
 
         // 1. Connect to the blockchain network using the RPC URL

@@ -62,7 +62,7 @@ function App() {
 
   return (
     <div className="w-full  flex flex-col items-center justify-center overflow-y-auto">
-      <div className="bg-black w-[90%] md:w-[85%] lg:w-[80%] max-w-7xl flex flex-col items-center justify-center min-h-screen text-white transition-all overflow-auto pt-20">
+      <div className=" w-[90%] md:w-[85%] lg:w-[80%] max-w-7xl flex flex-col items-center justify-center min-h-screen text-white transition-all overflow-auto pt-20">
         <main className="container mx-auto px-6 py-10">
           <Stats stats={stats} />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">

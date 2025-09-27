@@ -3,7 +3,7 @@ import { useAuth } from './AuthContext';
 import { ethers, formatUnits } from 'ethers';
 import abiJson from '../ABI/EchonetTokenABI.json';
 
-const YOUR_CONTRACT_ADDRESS = "0xa8F6624AA3027bEBB2BafAeD44b1431fe12E3B79";
+const YOUR_CONTRACT_ADDRESS = import.meta.env.VITE_TOKEN_CONTRACT_ADDRESS;
 const YOUR_CONTRACT_ABI = abiJson.output.abi;
 
 const EchoContext = createContext(null);
@@ -37,10 +37,10 @@ export const EchoProvider = ({ children }) => {
 
             const contract = new ethers.Contract(YOUR_CONTRACT_ADDRESS, YOUR_CONTRACT_ABI, provider);
 
-            // console.log("Fetching balance for address:", walletAddress);
+            console.log("Fetching balance for address:", walletAddress);
             const balance = await contract.balanceOf(walletAddress);
 
-            // console.log("Raw balance:", balance);
+            console.log("Raw balance:", balance);
             setEchoCoin(formatUnits(balance, 18));
         } catch (err) {
             console.error("Error fetching data from smart contract:", err);

@@ -6,366 +6,366 @@
 	"output": {
 		"abi": [
 			{
+				"type": "constructor",
 				"inputs": [
 					{
-						"internalType": "address",
 						"name": "_echoTokenAddress",
-						"type": "address"
+						"type": "address",
+						"internalType": "address"
 					},
 					{
-						"internalType": "uint256",
 						"name": "_stakeAmount",
-						"type": "uint256"
+						"type": "uint256",
+						"internalType": "uint256"
 					}
 				],
-				"stateMutability": "nonpayable",
-				"type": "constructor"
+				"stateMutability": "nonpayable"
 			},
 			{
-				"inputs": [],
-				"name": "AlreadyRegistered",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "DeviceIdAlreadyUsed",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "DeviceIdNotFound",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "IncorrectStakeAmount",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "NotRegistered",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "OnlyOwner",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "ReentrancyGuardReentrantCall",
-				"type": "error"
-			},
-			{
-				"inputs": [],
-				"name": "TransferFailed",
-				"type": "error"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "owner",
-						"type": "address"
-					},
-					{
-						"indexed": false,
-						"internalType": "string",
-						"name": "ipfsCID",
-						"type": "string"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "rewardAmount",
-						"type": "uint256"
-					}
-				],
-				"name": "ReadingSubmitted",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "to",
-						"type": "address"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					}
-				],
-				"name": "RewardMinted",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "owner",
-						"type": "address"
-					}
-				],
-				"name": "SensorDeregistered",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "owner",
-						"type": "address"
-					},
-					{
-						"indexed": false,
-						"internalType": "string",
-						"name": "deviceId",
-						"type": "string"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "stakeAmount",
-						"type": "uint256"
-					}
-				],
-				"name": "SensorRegistered",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": true,
-						"internalType": "address",
-						"name": "sensorAddress",
-						"type": "address"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "userStake",
-						"type": "uint256"
-					}
-				],
-				"name": "StakeSlashed",
-				"type": "event"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
+				"type": "function",
 				"name": "contributionScores",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
-						"internalType": "string",
 						"name": "",
-						"type": "string"
+						"type": "address",
+						"internalType": "address"
 					}
 				],
+				"outputs": [
+					{
+						"name": "",
+						"type": "uint256",
+						"internalType": "uint256"
+					}
+				],
+				"stateMutability": "view"
+			},
+			{
+				"type": "function",
 				"name": "deviceIdToOwner",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
-						"internalType": "string",
 						"name": "",
-						"type": "string"
-					},
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
+						"type": "string",
+						"internalType": "string"
 					}
 				],
+				"outputs": [
+					{
+						"name": "",
+						"type": "address",
+						"internalType": "address"
+					}
+				],
+				"stateMutability": "view"
+			},
+			{
+				"type": "function",
 				"name": "deviceReadings",
-				"outputs": [
+				"inputs": [
 					{
-						"internalType": "string",
-						"name": "ipfsCID",
-						"type": "string"
+						"name": "",
+						"type": "string",
+						"internalType": "string"
 					},
 					{
-						"internalType": "uint256",
+						"name": "",
+						"type": "uint256",
+						"internalType": "uint256"
+					}
+				],
+				"outputs": [
+					{
+						"name": "ipfsCID",
+						"type": "string",
+						"internalType": "string"
+					},
+					{
 						"name": "timestamp",
-						"type": "uint256"
+						"type": "uint256",
+						"internalType": "uint256"
 					}
 				],
-				"stateMutability": "view",
-				"type": "function"
+				"stateMutability": "view"
 			},
 			{
-				"inputs": [],
+				"type": "function",
 				"name": "echoToken",
+				"inputs": [],
 				"outputs": [
 					{
-						"internalType": "contract IEchoToken",
 						"name": "",
-						"type": "address"
+						"type": "address",
+						"internalType": "contract IEchoToken"
 					}
 				],
-				"stateMutability": "view",
-				"type": "function"
+				"stateMutability": "view"
 			},
 			{
-				"inputs": [],
+				"type": "function",
 				"name": "owner",
+				"inputs": [],
 				"outputs": [
 					{
-						"internalType": "address",
 						"name": "",
-						"type": "address"
+						"type": "address",
+						"internalType": "address"
 					}
 				],
-				"stateMutability": "view",
-				"type": "function"
+				"stateMutability": "view"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "string",
-						"name": "_deviceId",
-						"type": "string"
-					}
-				],
+				"type": "function",
 				"name": "registerSensor",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
+						"name": "_deviceId",
+						"type": "string",
+						"internalType": "string"
 					}
 				],
+				"outputs": [],
+				"stateMutability": "nonpayable"
+			},
+			{
+				"type": "function",
 				"name": "sensors",
+				"inputs": [
+					{
+						"name": "",
+						"type": "address",
+						"internalType": "address"
+					}
+				],
 				"outputs": [
 					{
-						"internalType": "address",
 						"name": "deviceOwner",
-						"type": "address"
+						"type": "address",
+						"internalType": "address"
 					},
 					{
-						"internalType": "bool",
 						"name": "isVerified",
-						"type": "bool"
+						"type": "bool",
+						"internalType": "bool"
 					},
 					{
-						"internalType": "string",
 						"name": "deviceId",
-						"type": "string"
+						"type": "string",
+						"internalType": "string"
 					}
 				],
-				"stateMutability": "view",
-				"type": "function"
+				"stateMutability": "view"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "string",
-						"name": "_deviceId",
-						"type": "string"
-					}
-				],
+				"type": "function",
 				"name": "slashStake",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "stakeAmount",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"name": "stakes",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "string",
 						"name": "_deviceId",
-						"type": "string"
+						"type": "string",
+						"internalType": "string"
+					}
+				],
+				"outputs": [],
+				"stateMutability": "nonpayable"
+			},
+			{
+				"type": "function",
+				"name": "stakeAmount",
+				"inputs": [],
+				"outputs": [
+					{
+						"name": "",
+						"type": "uint256",
+						"internalType": "uint256"
+					}
+				],
+				"stateMutability": "view"
+			},
+			{
+				"type": "function",
+				"name": "stakes",
+				"inputs": [
+					{
+						"name": "",
+						"type": "address",
+						"internalType": "address"
+					}
+				],
+				"outputs": [
+					{
+						"name": "",
+						"type": "uint256",
+						"internalType": "uint256"
+					}
+				],
+				"stateMutability": "view"
+			},
+			{
+				"type": "function",
+				"name": "submitReading",
+				"inputs": [
+					{
+						"name": "_deviceId",
+						"type": "string",
+						"internalType": "string"
 					},
 					{
-						"internalType": "string",
 						"name": "ipfsCID",
-						"type": "string"
+						"type": "string",
+						"internalType": "string"
 					}
 				],
-				"name": "submitReading",
 				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
+				"stateMutability": "nonpayable"
 			},
 			{
-				"inputs": [],
+				"type": "function",
 				"name": "unstakeAndDeregister",
+				"inputs": [],
 				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
+				"stateMutability": "nonpayable"
+			},
+			{
+				"type": "event",
+				"name": "ReadingSubmitted",
+				"inputs": [
+					{
+						"name": "owner",
+						"type": "address",
+						"indexed": true,
+						"internalType": "address"
+					},
+					{
+						"name": "ipfsCID",
+						"type": "string",
+						"indexed": false,
+						"internalType": "string"
+					},
+					{
+						"name": "rewardAmount",
+						"type": "uint256",
+						"indexed": false,
+						"internalType": "uint256"
+					}
+				],
+				"anonymous": false
+			},
+			{
+				"type": "event",
+				"name": "RewardMinted",
+				"inputs": [
+					{
+						"name": "to",
+						"type": "address",
+						"indexed": true,
+						"internalType": "address"
+					},
+					{
+						"name": "amount",
+						"type": "uint256",
+						"indexed": false,
+						"internalType": "uint256"
+					}
+				],
+				"anonymous": false
+			},
+			{
+				"type": "event",
+				"name": "SensorDeregistered",
+				"inputs": [
+					{
+						"name": "owner",
+						"type": "address",
+						"indexed": true,
+						"internalType": "address"
+					}
+				],
+				"anonymous": false
+			},
+			{
+				"type": "event",
+				"name": "SensorRegistered",
+				"inputs": [
+					{
+						"name": "owner",
+						"type": "address",
+						"indexed": true,
+						"internalType": "address"
+					},
+					{
+						"name": "deviceId",
+						"type": "string",
+						"indexed": false,
+						"internalType": "string"
+					},
+					{
+						"name": "stakeAmount",
+						"type": "uint256",
+						"indexed": false,
+						"internalType": "uint256"
+					}
+				],
+				"anonymous": false
+			},
+			{
+				"type": "event",
+				"name": "StakeSlashed",
+				"inputs": [
+					{
+						"name": "sensorAddress",
+						"type": "address",
+						"indexed": true,
+						"internalType": "address"
+					},
+					{
+						"name": "userStake",
+						"type": "uint256",
+						"indexed": false,
+						"internalType": "uint256"
+					}
+				],
+				"anonymous": false
+			},
+			{
+				"type": "error",
+				"name": "AlreadyRegistered",
+				"inputs": []
+			},
+			{
+				"type": "error",
+				"name": "DeviceIdAlreadyUsed",
+				"inputs": []
+			},
+			{
+				"type": "error",
+				"name": "DeviceIdNotFound",
+				"inputs": []
+			},
+			{
+				"type": "error",
+				"name": "IncorrectStakeAmount",
+				"inputs": []
+			},
+			{
+				"type": "error",
+				"name": "NotRegistered",
+				"inputs": []
+			},
+			{
+				"type": "error",
+				"name": "OnlyOwner",
+				"inputs": []
+			},
+			{
+				"type": "error",
+				"name": "ReentrancyGuardReentrantCall",
+				"inputs": []
+			},
+			{
+				"type": "error",
+				"name": "TransferFailed",
+				"inputs": []
 			}
 		],
 		"devdoc": {

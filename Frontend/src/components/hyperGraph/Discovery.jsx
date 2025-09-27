@@ -17,7 +17,7 @@ function Discovery({ onSearch, results, onDelete }) {
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-black border border-white/20 p-6 rounded-2xl shadow-xl backdrop-blur-lg"
+      className=" border bg-black-900/50 border-white/25   hover:border-white/30 transition-all duration-300 p-6 rounded-2xl shadow-xl backdrop-blur-lg"
     >
       <div className="flex items-center mb-6">
         <i className="fas fa-search-location text-2xl text-purple-400 mr-3"></i>

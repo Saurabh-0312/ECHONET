@@ -1,5 +1,5 @@
 // DashboardPage.jsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Routes, Route } from 'react-router-dom';
 
@@ -9,44 +9,45 @@ import Exchange from '../components/exchange/ExchangeCurrency.jsx';
 import UserDashboard from '@/components/dashboard/main/UserDashboard.jsx';
 import Market from './Market.jsx';
 import HyperGraphDevice from './HyperGraphDevice.jsx';
-import About from './About.jsx'
+import About from './About.jsx';
+import Bg from "../backgound/Bg.jsx";
 
 function DashboardPage() {
-    const {isRegistered,ensName } = useAuth();
+    const { isRegistered } = useAuth();
 
     return (
-        <div className="h-screen w-screen bg-black text-white flex flex-col overflow-hidden">
-            <style>{`
-                @keyframes fade-in {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-                .animate-fade-in {
-                    animation: fade-in 0.6s ease-out forwards;
-                }
-            `}</style>
+        <div className="relative h-screen w-screen bg-black text-white flex flex-col overflow-hidden">
+            {/* Background Layer */}
+            <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
+                <Bg />
+            </div>
 
-            <Navbar />
-            <main className="flex-1 relative overflow-hidden justify-center items-center">
-                <div className="h-full w-full overflow-y-auto">
-                    <Routes>
-                        <Route
-                            path="/dashboard"
-                            element={
-                                isRegistered ? (
-                                    <UserDashboard />
-                                ) : (
-                                    <RegistrationPrompt />
-                                )
-                            }
-                        />
-                        <Route path="/exchange" element={<Exchange />} />
-                        <Route path="/market" element={<Market />} />
-                        <Route path="/hypergraph" element={<HyperGraphDevice />} />
-                        <Route path="/about" element={<About />} />
-                    </Routes>
-                </div>
-            </main>
+            {/* Foreground Content */}
+            <div className="relative z-10 flex flex-col h-screen  overflow-hidden">
+                <Navbar />
+                <main className="flex-1 flex flex-col items-center justify-center">
+                    <div className="w-full mx-auto h-full flex flex-col items-center justify-center">
+                        <div className="w-full h-full overflow-y-auto px-4 py-8">
+                            <Routes>
+                                <Route
+                                    path="/dashboard"
+                                    element={
+                                        isRegistered ? (
+                                            <UserDashboard />
+                                        ) : (
+                                            <RegistrationPrompt />
+                                        )
+                                    }
+                                />
+                                <Route path="/exchange" element={<Exchange />} />
+                                <Route path="/market" element={<Market />} />
+                                <Route path="/hypergraph" element={<HyperGraphDevice />} />
+                                <Route path="/about" element={<About />} />
+                            </Routes>
+                        </div>
+                    </div>
+                </main>
+            </div>
         </div>
     );
 }
