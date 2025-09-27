@@ -39,6 +39,9 @@ agent = Agent(
     endpoint=["https://echonet-decibal-agent.onrender.com"],
     publish_agent_details=True,
 )
+
+agent.include(chat_protocol_spec)
+
 fund_agent_if_low(agent.wallet.address())
 
 # --- Knowledge Base Logic ---
