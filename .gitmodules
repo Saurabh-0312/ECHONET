@@ -10,3 +10,12 @@
 [submodule "Protocol/Polygon/lib/openzeppelin-contracts"]
 	path = Protocol/Polygon/lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "Protocol/UniSwap/lib/forge-std"]
+	path = Protocol/UniSwap/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "Protocol/UniSwap/lib/openzeppelin-contracts"]
+	path = Protocol/UniSwap/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "Protocol/UniSwap/lib/v4-core"]
+	path = Protocol/UniSwap/lib/v4-core
+	url = https://github.com/Uniswap/v4-core
