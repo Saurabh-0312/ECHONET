@@ -154,12 +154,12 @@ def audio_callback(indata, frames, time_info, status):
 
     print(f"\rRMS: {rms_bar:<50} | Peak: {peak_bar:<50} | dB: {db:.2f}", end='', flush=True)
 
-    # Create sensor data and add to queue for MQTT publishing
-    sensor_data = SensorData(
-        device_id=MAC_ADDRESS,
-        timestamp=datetime.now().isoformat(),
-        decibel=float(db)
-    )
+    # Create simplified sensor data and add to queue for publishing
+    sensor_data = {
+        "mac_address": MAC_ADDRESS,
+        "timestamp": datetime.now().isoformat(),
+        "decibel": float(db)
+    }
     
     try:
         sensor_data_queue.put_nowait(sensor_data)
@@ -444,9 +444,17 @@ def on_connect(client, userdata, flags, rc, properties):
 
 def on_message(client, userdata, msg):
     try: 
-        mqtt_message_queue.put(SensorData(**json.loads(msg.payload.decode())))
+        data = json.loads(msg.payload.decode())
+        # Convert to SensorData format for compatibility
+        sensor_data = SensorData(
+            device_id=data.get("mac_address", data.get("device_id")),
+            timestamp=data.get("timestamp"),
+            decibel=data.get("decibel")
+        )
+        mqtt_message_queue.put(sensor_data)
+        print(f"📥 Received MQTT: MAC={sensor_data.device_id}, dB={sensor_data.decibel:.2f}")
     except Exception as e: 
-        print(f"Error processing MQTT message: {e}")
+        print(f"❌ Error processing MQTT message: {e}")
 
 def start_mqtt_client():
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, f"device_node_mqtt_{MAC_ADDRESS}")
@@ -455,7 +463,7 @@ def start_mqtt_client():
     client.loop_forever()
 
 def mqtt_publisher_thread():
-    """Thread to publish sensor data to MQTT"""
+    """Thread to publish sensor data to MQTT and API every 2 seconds"""
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, f"sensor_publisher_{MAC_ADDRESS}")
     
     def on_publish_connect(client, userdata, flags, rc, properties):
@@ -468,29 +476,63 @@ def mqtt_publisher_thread():
     client.connect(MQTT_BROKER, MQTT_PORT, 60)
     client.loop_start()
     
+    last_publish_time = 0
+    
     while True:
         try:
-            # Get sensor data from queue (blocks until data available)
-            sensor_data = sensor_data_queue.get(timeout=5)
+            current_time = time.time()
             
-            # Publish to MQTT
-            topic = f"{MQTT_TOPIC_PREFIX}/{MAC_ADDRESS}"
-            payload = json.dumps(sensor_data.dict())
-            
-            result = client.publish(topic, payload)
-            
-            if result.rc == mqtt.MQTT_ERR_SUCCESS:
-                print(f"📡 Published sensor data: dB={sensor_data.decibel:.2f}")
-            else:
-                print(f"❌ Failed to publish sensor data: {result.rc}")
+            # Check if 2 seconds have passed since last publish
+            if current_time - last_publish_time >= 2.0:
+                # Get the latest sensor data if available
+                sensor_data = None
+                try:
+                    # Get all available data and use the latest
+                    while not sensor_data_queue.empty():
+                        sensor_data = sensor_data_queue.get_nowait()
+                        sensor_data_queue.task_done()
+                except queue.Empty:
+                    pass
                 
-            sensor_data_queue.task_done()
+                if sensor_data:
+                    # Print where we're publishing
+                    mqtt_topic = f"{MQTT_TOPIC_PREFIX}/{MAC_ADDRESS}"
+                    print(f"📍 Publishing to MQTT: {MQTT_BROKER}:{MQTT_PORT}/{mqtt_topic}")
+                    print(f"📍 Sending to API: {RAW_DATA_COLLECTOR_URL}")
+                    
+                    # Publish to MQTT
+                    payload = json.dumps(sensor_data)
+                    result = client.publish(mqtt_topic, payload)
+                    
+                    if result.rc == mqtt.MQTT_ERR_SUCCESS:
+                        print(f"📡 MQTT Published: MAC={sensor_data['mac_address']}, dB={sensor_data['decibel']:.2f}, Time={sensor_data['timestamp']}")
+                    else:
+                        print(f"❌ Failed to publish to MQTT: {result.rc}")
+                    
+                    # Send to API
+                    try:
+                        api_payload = {
+                            "mac_address": sensor_data["mac_address"],
+                            "timestamp": sensor_data["timestamp"],
+                            "decibel": sensor_data["decibel"]
+                        }
+                        
+                        response = requests.post(RAW_DATA_COLLECTOR_URL, json=api_payload, timeout=5)
+                        
+                        if response.status_code == 200:
+                            print(f"🌐 API Sent: MAC={api_payload['mac_address']}, dB={api_payload['decibel']:.2f}, Time={api_payload['timestamp']}")
+                        else:
+                            print(f"❌ API Error: Status {response.status_code}")
+                            
+                    except requests.exceptions.RequestException as e:
+                        print(f"❌ API Request failed: {e}")
+                    
+                    last_publish_time = current_time
+                
+            time.sleep(0.1)  # Small sleep to prevent busy waiting
             
-        except queue.Empty:
-            # Timeout occurred, continue loop
-            continue
         except Exception as e:
-            print(f"❌ Error in MQTT publisher: {e}")
+            print(f"❌ Error in publisher thread: {e}")
             time.sleep(1)
 
 # ======================================================================================
