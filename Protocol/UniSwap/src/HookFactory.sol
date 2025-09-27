@@ -31,7 +31,8 @@ contract HookFactory {
         );
 
         // Try different salts until we find one that produces a valid address
-        for (uint256 i = 0; i < 100000; i++) {
+        // Reduced from 100,000 to 1,000 to avoid gas limit issues
+        for (uint256 i = 0; i < 10000; i++) {
             bytes32 testSalt = bytes32(i);
             address predictedAddress = computeAddress(testSalt, mainContractAddress);
 

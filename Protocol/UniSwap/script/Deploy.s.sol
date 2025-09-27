@@ -18,9 +18,9 @@ import {SimplifiedMainContract} from "../src/SimplifiedMainContract.sol";
 
 contract Deploy is Script {
     IPoolManager public constant POOL_MANAGER = IPoolManager(0xE03A1074c86CFeDd5C142C4F04F1a1536e203543);
-    
+
     // Paste your deployed SimplifiedMainContract address here
-    address public constant MAIN_CONTRACT_ADDRESS = 0x0000000000000000000000000000000000000000;
+    address public constant MAIN_CONTRACT_ADDRESS = 0x7D5Db9F4c14DDD5b653bD3e9218e181B72d81E57;
 
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
