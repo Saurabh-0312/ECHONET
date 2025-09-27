@@ -144,8 +144,10 @@ export const getSensorData = async (req, res) => {
     try {
         const { cid } = req.params;
         if (!cid) return res.status(400).json({ error: "PieceCID is required" });
-        // console.log(`📥 Retrieving data for PieceCID: ${cid}...`);
+        console.log(`📥 Retrieving data for PieceCID: ${cid}...`);
         const retrieved = await synapse.storage.download(cid);
+        console.log("✅ Data retrieved successfully.");
+        
         const decoded = new TextDecoder().decode(retrieved);
         res.json({ pieceCid: cid, data: JSON.parse(decoded) });
     } catch (err) {
