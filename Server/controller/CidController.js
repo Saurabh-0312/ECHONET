@@ -27,7 +27,7 @@ const getCidData = async (req, res) => {
 							}
 						`;
         const data = await request(url, query, {}, headers);
-        console.log("Fetched CID data from The Graph:", data);
+        // console.log("Fetched CID data from The Graph:", data);
         res.status(200).json({ success: true, data });
     } catch (error) {
         console.error('Error fetching CID data from The Graph:', error);

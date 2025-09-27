@@ -55,6 +55,9 @@ const Navbar = () => {
                         <NavLink to="/exchange" className="text-gray-300 hover:text-white transition-all duration-200 px-3 py-2 rounded-lg hover:bg-white/10" style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}>
                             Convert
                         </NavLink>
+                        <NavLink to="/hypergraph" className="text-gray-300 hover:text-white transition-all duration-200 px-3 py-2 rounded-lg hover:bg-white/10" style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}>
+                            Knowledge Graph
+                        </NavLink>
                         <NavLink to="/about" className="text-gray-300 hover:text-white transition-all duration-200 px-3 py-2 rounded-lg hover:bg-white/10" style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}>
                             About Us
                         </NavLink>

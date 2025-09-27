@@ -1,10 +1,10 @@
-
 import { useState, useCallback } from "react";
 import { ethers } from "ethers";
 import abiJson from "../ABI/RegisterDeviceABI.json";
 import EchonetTokenABI from "../ABI/EchonetTokenABI.json";
 import { useAuth } from "@/context/AuthContext";
 import { Graph, Ipfs, ContentIds } from "@graphprotocol/grc-20";
+import axios from "axios";
 
 const MAIN_CONTRACT_ADDRESS = import.meta.env.VITE_MAIN_CONTRACT_ADDRESS;
 const TOKEN_CONTRACT_ADDRESS = import.meta.env.VITE_TOKEN_CONTRACT_ADDRESS;
@@ -21,13 +21,42 @@ export const useRegisterDevice = () => {
   const [error, setError] = useState(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  const BACKEND_URI = import.meta.env.VITE_BACKEND_URI || "http://localhost:3001";
+  const API_URL = `${BACKEND_URI}/api/hypergraph`;
+  // const API_URL = `http://localhost:3001/api/hypergraph`;
+
   const { walletAddress } = useAuth();
 
   const registerDevice = useCallback(
-    async ({ latitude, longitude, macAddress }) => {
+    async ({ latitude,
+      longitude,
+      macAddress,
+      deviceId,
+      deviceType,
+      deviceLocation,
+      locality,
+      dataType,
+      projectName}) => {
       setIsLoading(true);
       setError(null);
       setIsSuccess(false);
+
+      const mappedData = {
+        deviceId: deviceId,
+        name: macAddress, // or use a separate name field if you have one
+        type: deviceType,
+        location: deviceLocation,
+        locality: locality,
+        latitude: latitude,
+        longitude: longitude,
+        dataType: dataType,
+        project: projectName,
+        ownerAddress: walletAddress,
+        description: `Sensor ${macAddress} at ${deviceLocation}`, // or use a description field from your form
+      };
+
+      console.log("Mapped Data:", mappedData);
+      
 
       try {
         // 1️⃣ Validate Inputs
@@ -46,6 +75,10 @@ export const useRegisterDevice = () => {
         if (typeof window.ethereum === "undefined") {
           throw new Error("MetaMask not detected. Please install MetaMask.");
         }
+
+        console.log("Registering device data:", mappedData);
+
+        await axios.post(API_URL, mappedData);
 
         // 2️⃣ Setup Provider & Signer
         const provider = new ethers.BrowserProvider(window.ethereum);

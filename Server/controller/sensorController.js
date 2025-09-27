@@ -35,7 +35,7 @@ async function notifySmartContract(pieceCid, deviceId) {
         //     : pieceCid;
         
         // console.log("Piece id",formattedPieceId);
-        console.log(deviceId);
+        // console.log(deviceId);
         // console.log()
         // console.log(`[CONTRACT] Submitting reading to contract for device: ${deviceId}`);
         
@@ -76,14 +76,14 @@ async function processQueue() {
 
         const batch = [...buffers[deviceId]];
         const encoded = new TextEncoder().encode(JSON.stringify(batch));
-        console.log(`📤 Uploading batch for ${deviceId} with ${batch.length} records...`);
+        // console.log(`📤 Uploading batch for ${deviceId} with ${batch.length} records...`);
 
         const uploadResult = await synapse.storage.upload(encoded, {
             maxFee: "1000000000000000000", // 1 FIL
             gasLimit: 500000000
         });
-        console.log("Upload Gas Params Used ✅");
-        console.log(`✅ Stored batch PieceCID: ${uploadResult.pieceCid}`);
+        // console.log("Upload Gas Params Used ✅");
+        // console.log(`✅ Stored batch PieceCID: ${uploadResult.pieceCid}`);
 
         await notifySmartContract(uploadResult.pieceCid, deviceId);
 
@@ -128,7 +128,7 @@ export const bufferSensorData = async (req, res) => {
         const deviceId = sensorData.deviceId;
         if (!buffers[deviceId]) buffers[deviceId] = [];
         buffers[deviceId].push(sensorData);
-        console.log(`📥 Received data from ${deviceId}. Buffer size: ${buffers[deviceId].length}`);
+        // console.log(`📥 Received data from ${deviceId}. Buffer size: ${buffers[deviceId].length}`);
         if (!timers[deviceId]) {
             timers[deviceId] = setTimeout(() => flushBuffer(deviceId), BATCH_INTERVAL);
             console.log(`⏳ Started batch timer for ${deviceId}`);
@@ -144,9 +144,9 @@ export const getSensorData = async (req, res) => {
     try {
         const { cid } = req.params;
         if (!cid) return res.status(400).json({ error: "PieceCID is required" });
-        console.log(`📥 Retrieving data for PieceCID: ${cid}...`);
+        // console.log(`📥 Retrieving data for PieceCID: ${cid}...`);
         const retrieved = await synapse.storage.download(cid);
-        console.log("✅ Data retrieved successfully.");
+        // console.log("✅ Data retrieved successfully.");
         
         const decoded = new TextDecoder().decode(retrieved);
         res.json({ pieceCid: cid, data: JSON.parse(decoded) });

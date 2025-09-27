@@ -36,7 +36,7 @@ async function registerToHypergraph(sensorData) {
     const rpcUrl = process.env.POLYGON_AMOY_RPC_URL || "https://rpc-amoy.polygon.technology";
     const provider = new JsonRpcProvider(rpcUrl);
     const wallet = new Wallet(privateKey, provider);
-    
+
     const createStringProperty = (name, description) => Graph.createProperty({ name, description, dataType: "STRING" });
     const createNumberProperty = (name, description) => Graph.createProperty({ name, description, dataType: "NUMBER" });
 
@@ -75,7 +75,7 @@ async function registerToHypergraph(sensorData) {
     });
 
     console.log("Published to Hypergraph:", publicationResult);
-    
+
     return {
       success: true, entityId: entityResult.id,
       cid: publicationResult.cid, editId: publicationResult.editId
@@ -92,27 +92,47 @@ const registerSensor = async (req, res) => {
       dataType, project, ownerAddress, description
     } = req.body;
 
+    console.log("hyperGraphDevice registerSensor called with:", req.body);
+    
+
     if (!deviceId || !type || !location || !locality || latitude === undefined || longitude === undefined || !dataType || !project || !ownerAddress) {
       return res.status(400).json({ success: false, error: "Missing required fields" });
     }
 
+    console.log("All required fields are present.");
+    
+
     if (!/^0x[a-fA-F0-9]{40}$/.test(ownerAddress)) {
       return res.status(400).json({ success: false, error: "Invalid Ethereum address format" });
     }
+
+    console.log("Owner address format is valid.");
     
+
     if (registeredSensors.find((s) => s.id === deviceId)) {
       return res.status(400).json({ success: false, error: "Device ID already exists." });
     }
 
+    console.log("Device ID is unique.");
+    
+
+    console.log("Validated input data, proceeding to register sensor.");
+
     const sensorData = {
-      id: deviceId, deviceId, name: name || deviceId, type, location, locality,
-      latitude, longitude, dataType, project, ownerAddress,
+      id: deviceId, deviceId, 
+      name: name || deviceId, 
+      type, location, locality,
+      latitude, 
+      longitude, 
+      dataType, 
+      project, 
+      ownerAddress,
       description: description || `${dataType} sensor monitoring in ${locality}, ${location}`,
       timestamp: new Date().toISOString(), status: "active",
     };
 
     console.log("Registering sensor:", sensorData);
-    
+
     let hypergraphResult = { success: false };
     if (process.env.YOUR_PRIVATE_KEY) {
       hypergraphResult = await registerToHypergraph(sensorData);
@@ -122,7 +142,7 @@ const registerSensor = async (req, res) => {
         cid: `demo-cid-${Date.now()}`, editId: `demo-edit-${Date.now()}`
       };
     }
-      console.log('registerToHypergraph result:', hypergraphResult);
+    console.log('registerToHypergraph result:', hypergraphResult);
 
     if (hypergraphResult.success) {
       sensorData.hypergraphEntityId = hypergraphResult.entityId;
@@ -131,7 +151,7 @@ const registerSensor = async (req, res) => {
 
       registeredSensors.push(sensorData);
       saveSensors();
-      
+
       res.status(201).json({ success: true, sensor: sensorData, message: "Sensor registered successfully!" });
     } else {
       res.status(500).json({ success: false, error: hypergraphResult.error || "Failed to register to Hypergraph" });

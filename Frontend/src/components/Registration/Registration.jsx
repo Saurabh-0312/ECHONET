@@ -6,15 +6,17 @@ import { useRegisterDevice } from '../../hooks/UseRegisterDevice.jsx';
 import { useAuth } from '@/context/AuthContext.jsx';
 import { Navigate, useNavigate } from 'react-router-dom';
 
-// --- Main App Component ---
-
-// --- Main App Component ---
-
 function Registration() {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [macAddress, setMacAddress] = useState('');
-  
+  const [deviceId, setDeviceId] = useState('');
+  const [deviceType, setDeviceType] = useState('');
+  const [deviceLocation, setDeviceLocation] = useState('');
+  const [locality, setLocality] = useState('');
+  const [dataType, setDataType] = useState('');
+  const [projectName, setProjectName] = useState('');
+
   const { registerDevice, isLoading, error, isSuccess } = useRegisterDevice();
   const { setIsRegistered } = useAuth();    
 
@@ -22,104 +24,169 @@ function Registration() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // The hook will handle setting loading, error, and success states
-    const result = await registerDevice({ latitude, longitude, macAddress });
-    
-    // If the registration was successful, clear the form fields
+    const result = await registerDevice({
+      latitude,
+      longitude,
+      macAddress,
+      deviceId,
+      deviceType,
+      deviceLocation,
+      locality,
+      dataType,
+      projectName,
+    });
+
     if (result.success) {
       setLatitude('');
       setLongitude('');
       setMacAddress('');
-      setIsRegistered(true); // Update the registration status in AuthContext
-      Navigate('/dashboard'); // Redirect to dashboard after successful registration
+      setDeviceId('');
+      setDeviceType('');
+      setDeviceLocation('');
+      setLocality('');
+      setDataType('');
+      setProjectName('');
+      setIsRegistered(true);
+      Navigate('/dashboard');
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-black text-white flex items-center justify-center p-4 font-sans">
-      <div className="w-full max-w-md mx-auto p-8 space-y-8 bg-gray-900 rounded-2xl shadow-2xl border border-gray-700">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-white">Register Device</h1>
-          <p className="text-gray-400 mt-2">Enter location and device details below.</p>
+    <div className="min-h-screen w-full bg-gradient-to-br from-gray-950 to-gray-900 text-white flex items-center justify-center p-6">
+      <div className="w-full max-w-4xl mx-auto p-10 space-y-8 bg-gray-900 rounded-2xl shadow-2xl border border-gray-800">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-extrabold tracking-tight">Register Your Device</h1>
+          <p className="text-gray-400 text-lg">Provide device, project & location details.</p>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Latitude Input */}
-          <div className="relative">
-            <label htmlFor="latitude" className="sr-only">Latitude</label>
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <MapPinIcon />
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Device Details Section */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-300 mb-4 border-b border-gray-700 pb-2">Device Details</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                required
+                value={deviceId}
+                onChange={(e) => setDeviceId(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Device ID"
+              />
+              <input
+                type="text"
+                required
+                value={deviceType}
+                onChange={(e) => setDeviceType(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Device Type"
+              />
+              <input
+                type="text"
+                required
+                value={deviceLocation}
+                onChange={(e) => setDeviceLocation(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Device Location"
+              />
+              <input
+                type="text"
+                required
+                value={locality}
+                onChange={(e) => setLocality(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Locality"
+              />
             </div>
-            <input
-              id="latitude"
-              type="text"
-              required
-              value={latitude}
-              onChange={(e) => setLatitude(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              placeholder="Latitude (e.g., 34.0522)"
-            />
           </div>
 
-          {/* Longitude Input */}
-          <div className="relative">
-            <label htmlFor="longitude" className="sr-only">Longitude</label>
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <GlobeIcon />
+          {/* Project Details Section */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-300 mb-4 border-b border-gray-700 pb-2">Project Details</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <input
+                type="text"
+                required
+                value={dataType}
+                onChange={(e) => setDataType(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Data Type"
+              />
+              <input
+                type="text"
+                required
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Project Name"
+              />
             </div>
-            <input
-              id="longitude"
-              type="text"
-              required
-              value={longitude}
-              onChange={(e) => setLongitude(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              placeholder="Longitude (e.g., -118.2437)"
-            />
           </div>
 
-          {/* MAC Address Input */}
-          <div className="relative">
-            <label htmlFor="mac-address" className="sr-only">Device MAC Address</label>
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <ServerIcon />
+          {/* Location Section */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-300 mb-4 border-b border-gray-700 pb-2">Location</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="relative">
+                <MapPinIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  required
+                  value={latitude}
+                  onChange={(e) => setLatitude(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="Latitude"
+                />
+              </div>
+              <div className="relative">
+                <GlobeIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  required
+                  value={longitude}
+                  onChange={(e) => setLongitude(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="Longitude"
+                />
+              </div>
+              <div className="relative">
+                <ServerIcon className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  required
+                  value={macAddress}
+                  onChange={(e) => setMacAddress(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  placeholder="MAC Address"
+                />
+              </div>
             </div>
-            <input
-              id="mac-address"
-              type="text"
-              required
-              value={macAddress}
-              onChange={(e) => setMacAddress(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              placeholder="MAC Address (e.g., 00:1A:2B:3C:4D:5E)"
-            />
           </div>
 
-          {/* Feedback Area */}
+          {/* Feedback */}
           <div className="h-5 text-center">
             {error && <p className="text-red-500 text-sm">{error}</p>}
             {isSuccess && <p className="text-green-500 text-sm">Device registered successfully!</p>}
           </div>
 
           {/* Submit Button */}
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 flex justify-center items-center"
-            >
-              {isLoading ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Registering...
-                  </>
-              ) : (
-                'Register Device'
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3 px-4 font-semibold text-white bg-blue-600 rounded-xl shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:scale-100 flex justify-center items-center"
+          >
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Registering...
+              </>
+            ) : (
+              'Register Device'
+            )}
+          </button>
         </form>
       </div>
     </div>
@@ -127,4 +194,3 @@ function Registration() {
 }
 
 export default Registration;
-

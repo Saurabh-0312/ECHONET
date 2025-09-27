@@ -26,22 +26,24 @@ function DashboardPage() {
             `}</style>
 
             <Navbar />
-            <main className="flex-1 relative overflow-hidden">
-                <Routes>
-                    <Route
-                        path="/dashboard"
-                        element={
-                            isRegistered ? (
-                                <UserDashboard />
-                            ) : (
-                                <RegistrationPrompt />
-                            )
-                        }
-                    />
-                    <Route path="/exchange" element={<Exchange />} />
-                    <Route path="/market" element={<Market />} />
-                    <Route path="/hypergraph" element={<HyperGraphDevice />} />
-                </Routes>
+            <main className="flex-1 relative overflow-hidden justify-center items-center">
+                <div className="h-full w-full overflow-y-auto">
+                    <Routes>
+                        <Route
+                            path="/dashboard"
+                            element={
+                                isRegistered ? (
+                                    <UserDashboard />
+                                ) : (
+                                    <RegistrationPrompt />
+                                )
+                            }
+                        />
+                        <Route path="/exchange" element={<Exchange />} />
+                        <Route path="/market" element={<Market />} />
+                        <Route path="/hypergraph" element={<HyperGraphDevice />} />
+                    </Routes>
+                </div>
             </main>
         </div>
     );
