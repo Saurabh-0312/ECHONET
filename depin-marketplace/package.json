@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test-dynamic-market.js",
+    "test-all": "node test-dynamic-market.js --all",
+    "test-minimal": "node test-minimal.js"
   },
   "keywords": [],
   "author": "",

@@ -253,7 +253,129 @@ try {
   console.error("❌ Error setting up simple test endpoint:", error);
 }
 
-// --- 4. TEST FACILITATOR CONNECTIVITY ---
+// --- DYNAMIC DATA ENDPOINT HANDLER ---
+const createDynamicDataEndpoint = (deviceId, ownerAddress, priceAmount, readingIndex = "0") => {
+  const routePath = `/data/dynamic/${deviceId}/${readingIndex}`;
+  
+  try {
+    console.log(`Creating dynamic endpoint: ${routePath}`);
+    console.log(`Owner: ${ownerAddress}, Price: $${priceAmount}`);
+    
+    // Create the payment middleware for this specific endpoint
+    const dynamicPaymentMiddleware = paymentMiddleware(
+      ownerAddress, // Payment recipient
+      {
+        [routePath]: {
+          price: `$${priceAmount}`,
+          network: "polygon-amoy", 
+          token: process.env.PAYMENT_TOKEN_ADDRESS,
+          config: {
+            description: `Purchase data from device ${deviceId} - payment to owner`,
+          },
+        },
+      },
+      {
+        url: process.env.FACILITATOR_URL,
+      }
+    );
+
+    // Register the route with payment middleware
+    app.get(routePath, dynamicPaymentMiddleware, (req, res) => {
+      // Set params for the handler
+      req.params = {
+        deviceId: deviceId,
+        readingIndex: readingIndex,
+      };
+      return dataEndpointHandler(req, res);
+    });
+    
+    console.log(`✅ Dynamic route created: ${routePath}`);
+    return routePath;
+    
+  } catch (error) {
+    console.error(`❌ Error creating dynamic endpoint for ${deviceId}:`, error);
+    return null;
+  }
+};
+
+// --- 4. WALLET DEBUG ENDPOINT ---
+app.get("/debug/wallet", async (req, res) => {
+  try {
+    console.log("🔍 Debugging buyer wallet configuration...");
+    
+    // Setup buyer wallet
+    const buyerAccount = privateKeyToAccount(process.env.BUYER_WALLET_PRIVATE_KEY);
+    console.log(`Buyer wallet address: ${buyerAccount.address}`);
+    
+    // Check ETH balance
+    const ethBalance = await provider.getBalance(buyerAccount.address);
+    console.log(`ETH Balance: ${ethers.formatEther(ethBalance)} MATIC`);
+    
+    // Check USDC balance
+    const usdcContract = new ethers.Contract(
+      process.env.PAYMENT_TOKEN_ADDRESS,
+      [
+        "function balanceOf(address) view returns (uint256)",
+        "function decimals() view returns (uint8)",
+        "function symbol() view returns (string)",
+        "function name() view returns (string)"
+      ],
+      provider
+    );
+    
+    const usdcBalance = await usdcContract.balanceOf(buyerAccount.address);
+    const decimals = await usdcContract.decimals();
+    const symbol = await usdcContract.symbol();
+    const name = await usdcContract.name();
+    
+    console.log(`${symbol} Balance: ${ethers.formatUnits(usdcBalance, decimals)} ${symbol}`);
+    
+    const response = {
+      buyerWallet: {
+        address: buyerAccount.address,
+        ethBalance: ethers.formatEther(ethBalance),
+        ethBalanceWei: ethBalance.toString()
+      },
+      paymentToken: {
+        address: process.env.PAYMENT_TOKEN_ADDRESS,
+        name: name,
+        symbol: symbol,
+        decimals: decimals,
+        balance: ethers.formatUnits(usdcBalance, decimals),
+        balanceRaw: usdcBalance.toString()
+      },
+      network: {
+        rpcUrl: process.env.RPC_URL,
+        facilitatorUrl: process.env.FACILITATOR_URL
+      },
+      recommendations: []
+    };
+    
+    // Add recommendations based on balances
+    if (parseFloat(ethBalance) < 0.01) {
+      response.recommendations.push("⚠️ Low MATIC balance - you need MATIC for gas fees. Get some from a faucet.");
+    }
+    
+    if (parseFloat(ethers.formatUnits(usdcBalance, decimals)) < 0.01) {
+      response.recommendations.push("⚠️ No USDC balance - you need USDC to make payments. Get some from a faucet or DEX.");
+    }
+    
+    if (response.recommendations.length === 0) {
+      response.recommendations.push("✅ Wallet looks properly funded!");
+    }
+    
+    return res.json(response);
+    
+  } catch (error) {
+    console.error("Error checking wallet:", error);
+    return res.status(500).json({
+      error: "Failed to check wallet",
+      details: error.message
+    });
+  }
+});
+
+// --- 5. TEST FACILITATOR CONNECTIVITY ---
 app.get("/test-facilitator", async (req, res) => {
   try {
     console.log("Testing facilitator connectivity...");
@@ -275,7 +397,7 @@ app.get("/test-facilitator", async (req, res) => {
   }
 });
 
-// --- 5. DEBUG ENDPOINT (for testing) ---
+// --- 6. DEBUG ENDPOINT (for testing) ---
 app.get("/debug/:deviceId/:readingIndex", async (req, res) => {
   try {
     const { deviceId, readingIndex } = req.params;
@@ -315,29 +437,67 @@ app.get("/debug/:deviceId/:readingIndex", async (req, res) => {
   }
 });
 
-// --- 6. MARKET CLIENT ENDPOINT ---
-app.get("/market", async (req, res) => {
-  console.log("=== TESTING DATA ENDPOINT ===");
+// --- 7. DYNAMIC MARKET ENDPOINT ---
+app.post("/market/purchase", async (req, res) => {
+  console.log("=== DYNAMIC MARKET PURCHASE REQUEST ===");
   
   try {
-    const targetUrl = `http://localhost:${PORT}/data/00:1A:2B:3C:4D:5E/0`;
-    console.log(`Attempting to buy data from: ${targetUrl}`);
-    console.log("Making payment request...");
-
-    // Setup buyer's wallet - exactly like the working client
-    const account = privateKeyToAccount(process.env.BUYER_WALLET_PRIVATE_KEY);
-    const client = createWalletClient({
-      account,
+    // Extract parameters from request body
+    const { deviceId, ownerAddress, priceAmount, readingIndex = "0" } = req.body;
+    
+    // Validate required parameters
+    if (!deviceId || !ownerAddress || !priceAmount) {
+      return res.status(400).json({
+        error: "Missing required parameters",
+        required: ["deviceId", "ownerAddress", "priceAmount"],
+        received: { deviceId, ownerAddress, priceAmount }
+      });
+    }
+    
+    console.log(`Purchase request for device: ${deviceId}`);
+    console.log(`Payment recipient: ${ownerAddress}`);
+    console.log(`Price: $${priceAmount}`);
+    console.log(`Reading index: ${readingIndex}`);
+    
+    // Create dynamic endpoint URL for this specific request
+    const targetUrl = `http://localhost:${PORT}/data/${deviceId}/${readingIndex}`;
+    console.log(`Target URL: ${targetUrl}`);
+    
+    // Setup buyer's wallet
+    const buyerAccount = privateKeyToAccount(process.env.BUYER_WALLET_PRIVATE_KEY);
+    const buyerClient = createWalletClient({
+      account: buyerAccount,
       chain: polygonAmoy,
       transport: http(process.env.RPC_URL),
     });
-    console.log(`Client wallet address: ${client.account.address}`);
+    console.log(`Buyer wallet address: ${buyerClient.account.address}`);
 
-    // Wrap fetch with payment logic - exactly like the working client
-    const fetchWithPayment = wrapFetchWithPayment(fetch, client);
+    // Since x402-express middleware is configured at startup and doesn't handle dynamic routes well,
+    // we'll use a simple approach: create a dynamic endpoint that handles the payment flow
     
-    // Make the payment request
-    const response = await fetchWithPayment(targetUrl, { method: "GET" });
+    // Create dynamic endpoint for this purchase request
+    const dynamicRoute = createDynamicDataEndpoint(deviceId, ownerAddress, priceAmount, readingIndex);
+    
+    if (!dynamicRoute) {
+      return res.status(500).json({
+        error: "Failed to create dynamic payment endpoint",
+        deviceId,
+        ownerAddress,
+        priceAmount
+      });
+    }
+    
+    // Create the full URL for the dynamic endpoint
+    const dynamicUrl = `http://localhost:${PORT}${dynamicRoute}`;
+    console.log(`Dynamic endpoint URL: ${dynamicUrl}`);
+    
+    // Create a payment-enabled fetch instance
+    const paymentFetch = wrapFetchWithPayment(fetch, buyerClient);
+    
+    console.log("Making payment request to dynamic endpoint...");
+    
+    // Make the payment request to the dynamic endpoint
+    const response = await paymentFetch(dynamicUrl, { method: "GET" });
 
     console.log(`Response status: ${response.status}`);
     
@@ -424,7 +584,14 @@ app.get("/market", async (req, res) => {
         success: true,
         data: data,
         paymentInfo: paymentInfo,
-        message: "Data successfully purchased from marketplace"
+        purchaseDetails: {
+          deviceId: deviceId,
+          ownerAddress: ownerAddress,
+          priceAmount: priceAmount,
+          readingIndex: readingIndex,
+          endpointUsed: dynamicRoute
+        },
+        message: "Data successfully purchased from dynamic marketplace endpoint"
       });
 
     } catch (parseError) {
@@ -461,12 +628,123 @@ app.get("/market", async (req, res) => {
   }
 });
 
-// --- 7. THE PROTECTED API ENDPOINT ---
+// --- 8. ORIGINAL MARKET CLIENT ENDPOINT (for backward compatibility) ---
+app.get("/market", async (req, res) => {
+  console.log("=== ORIGINAL MARKET ENDPOINT (BACKWARD COMPATIBILITY) ===");
+  
+  try {
+    const targetUrl = `http://localhost:${PORT}/data/00:1A:2B:3C:4D:5E/0`;
+    console.log(`Attempting to buy data from: ${targetUrl}`);
+    console.log("Making payment request...");
 
-// IMPORTANT: Route is now defined above with payment middleware
+    // Setup buyer's wallet
+    const marketAccount = privateKeyToAccount(process.env.BUYER_WALLET_PRIVATE_KEY);
+    const marketClient = createWalletClient({
+      account: marketAccount,
+      chain: polygonAmoy,
+      transport: http(process.env.RPC_URL),
+    });
+    console.log(`Client wallet address: ${marketClient.account.address}`);
+
+    // Wrap fetch with payment logic
+    const marketFetchWithPayment = wrapFetchWithPayment(fetch, marketClient);
+    
+    // Make the payment request
+    const response = await marketFetchWithPayment(targetUrl, { method: "GET" });
+
+    console.log(`Response status: ${response.status}`);
+    
+    // Get headers object
+    const headers = Object.fromEntries(response.headers);
+    console.log("Response headers:", headers);
+
+    if (!response.ok) {
+      let errorBody;
+      try {
+        const responseText = await response.text();
+        console.log(`Raw error response: ${responseText}`);
+        errorBody = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse error response:", parseError.message);
+        errorBody = { error: "Unable to parse error response" };
+      }
+      
+      // Check if this is a payment challenge (402) or an actual error
+      if (response.status === 402) {
+        return res.status(200).json({
+          success: false,
+          message: "Payment system is working but settlement failed",
+          status: response.status,
+          paymentChallenge: errorBody,
+          note: "This indicates the x402 payment system is functional but there may be wallet funding or network issues"
+        });
+      }
+      
+      return res.status(response.status).json({
+        error: "Payment or data retrieval failed",
+        status: response.status,
+        details: errorBody
+      });
+    }
+
+    // Handle successful response
+    let responseText;
+    try {
+      responseText = await response.text();
+      const data = JSON.parse(responseText);
+      console.log("\n✅ SUCCESS! Data Purchased:");
+      console.log(data);
+
+      // The server includes payment confirmation in a response header
+      let paymentInfo = null;
+      try {
+        const paymentHeaderValue = response.headers.get("x-payment-response");
+        if (paymentHeaderValue) {
+          paymentInfo = decodeXPaymentResponse(paymentHeaderValue);
+          if (paymentInfo) {
+            console.log("\n🧾 Payment Receipt:");
+            console.log(
+              `  Transaction Hash: https://www.oklink.com/amoy/tx/${paymentInfo.txHash}`
+            );
+          }
+        }
+      } catch (paymentError) {
+        console.error("Error decoding payment response:", paymentError.message);
+      }
+
+      return res.status(200).json({
+        success: true,
+        data: data,
+        paymentInfo: paymentInfo,
+        message: "Data successfully purchased from original marketplace endpoint"
+      });
+
+    } catch (parseError) {
+      console.error("JSON Parse Error:", parseError.message);
+      return res.status(500).json({
+        error: "Invalid JSON response from data endpoint",
+        details: parseError.message,
+        rawResponse: responseText
+      });
+    }
+
+  } catch (error) {
+    console.error("\n❌ ERROR during market purchase:", error.message);
+    
+    return res.status(500).json({ 
+      error: "Failed to execute market purchase", 
+      details: error.message 
+    });
+  }
+});
+
+// --- 9. THE PROTECTED API ENDPOINT ---
+
+// IMPORTANT: Routes are now defined above with payment middleware
 // The dataEndpointHandler function is applied as the final handler after payment verification
+// Dynamic routes are created on-demand via the /market/purchase endpoint
 
-// --- 8. START THE SERVER ---
+// --- 10. START THE SERVER ---
 app.listen(PORT, () => {
   console.log(`✅ Marketplace server running on http://localhost:${PORT}`);
 });
