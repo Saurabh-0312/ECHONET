@@ -4,6 +4,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { ethers } from "ethers";
 import { paymentMiddleware } from "x402-express";
+import fetch from "x402-fetch";
 
 // --- 1. INITIAL SETUP ---
 dotenv.config();
@@ -80,6 +81,16 @@ console.log("Creating payment middleware with simple config...");
 
 // According to docs: paymentMiddleware("0xYourAddress", { "/your-endpoint": "$0.01" })
 // But our case is dynamic, so we use the callback version
+
+// --- HEALTH CHECK ENDPOINT ---
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    service: "depin-marketplace",
+    port: PORT
+  });
+});
 
 // --- DATA ENDPOINT HANDLER FUNCTION ---
 const dataEndpointHandler = async (req, res) => {
@@ -301,12 +312,94 @@ app.get("/debug/:deviceId/:readingIndex", async (req, res) => {
   }
 });
 
-// --- 6. THE PROTECTED API ENDPOINT ---
+// --- 6. MARKET CLIENT ENDPOINT ---
+app.get("/market", async (req, res) => {
+  console.log("=== TESTING DATA ENDPOINT ===");
+  
+  try {
+    const targetUrl = `http://localhost:${PORT}/data/00:1A:2B:3C:4D:5E/0`;
+    console.log(`Attempting to buy data from: ${targetUrl}`);
+    console.log("Making payment request...");
+
+    // Create buyer wallet from private key
+    const buyerWallet = new ethers.Wallet(process.env.BUYER_WALLET_PRIVATE_KEY);
+    
+    // Make the payment request using x402-fetch
+    const response = await fetch(targetUrl, {
+      wallet: buyerWallet,
+      tokenAddress: process.env.PAYMENT_TOKEN_ADDRESS,
+      rpcUrl: process.env.RPC_URL,
+      facilitatorUrl: process.env.FACILITATOR_URL
+    });
+
+    console.log(`Response status: ${response.status}`);
+    
+    // Get headers object
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    console.log("Response headers:", headers);
+
+    // Get response text
+    const responseText = await response.text();
+    console.log(`Raw response text length: ${responseText.length}`);
+    console.log(`Raw response text: ${JSON.stringify(responseText)}`);
+
+    if (response.ok) {
+      const data = JSON.parse(responseText);
+      console.log("\n✅ SUCCESS! Data Purchased:");
+      console.log(data);
+      
+      // Get payment info from headers
+      const paymentHeader = response.headers.get('x-payment-response');
+      if (paymentHeader) {
+        console.log(`Payment header raw value: ${JSON.stringify(paymentHeader)}`);
+        
+        try {
+          const paymentInfo = JSON.parse(Buffer.from(paymentHeader, 'base64').toString());
+          console.log("Payment info:", paymentInfo);
+          
+          return res.status(200).json({
+            success: true,
+            data: data,
+            paymentInfo: paymentInfo,
+            message: "Data successfully purchased from marketplace"
+          });
+        } catch (e) {
+          console.log("Could not decode payment header:", e.message);
+        }
+      }
+      
+      return res.status(200).json({
+        success: true,
+        data: data,
+        message: "Data successfully purchased from marketplace"
+      });
+    } else {
+      console.error(`❌ Failed to purchase data. Status: ${response.status}`);
+      return res.status(response.status).json({
+        error: "Failed to purchase data",
+        status: response.status,
+        response: responseText
+      });
+    }
+
+  } catch (error) {
+    console.error("❌ Market endpoint error:", error);
+    return res.status(500).json({ 
+      error: "Failed to execute market purchase", 
+      details: error.message 
+    });
+  }
+});
+
+// --- 7. THE PROTECTED API ENDPOINT ---
 
 // IMPORTANT: Route is now defined above with payment middleware
 // The dataEndpointHandler function is applied as the final handler after payment verification
 
-// --- 7. START THE SERVER ---
+// --- 8. START THE SERVER ---
 app.listen(PORT, () => {
   console.log(`✅ Marketplace server running on http://localhost:${PORT}`);
 });
