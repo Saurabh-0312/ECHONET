@@ -24,10 +24,23 @@ app.add_middleware(
 
 class DeviceData(BaseModel):
     device_id: str
+    mac_address: str  # MAC address as unique identifier
     location: Dict[str, float]  # {"latitude": float, "longitude": float}
     decibel: float
     event: str
     timestamp: str
+
+class EnrichedPacket(BaseModel):
+    """Model for enriched packet data from external sources"""
+    mac_address: str
+    device_id: str = None
+    latitude: float
+    longitude: float
+    decibel_level: float = None
+    noise_level: float = None
+    event_type: str = "sensor_data"
+    timestamp: str = None
+    metadata: Dict[str, Any] = {}
 
 def generate_device_data():
     """Generate realistic device sensor data"""
@@ -51,8 +64,12 @@ def generate_device_data():
     
     events = ["traffic", "construction", "emergency", "normal", "event", "industrial"]
     
+    # Generate realistic MAC addresses for demo data
+    mac_address = ":".join([f"{random.randint(0, 255):02x}" for _ in range(6)])
+    
     return {
         "device_id": f"DEVICE_{random.randint(1000, 9999)}",
+        "mac_address": mac_address,
         "location": {
             "latitude": round(lat, 4),
             "longitude": round(lng, 4)
@@ -73,14 +90,33 @@ def hello_world():
 
 @app.post("/data/submit")
 def submit_device_data(data: DeviceData):
-    """Submit device sensor data"""
+    """Submit device sensor data - updates existing device if MAC address exists"""
     data_dict = data.dict()
-    submitted_data.append(data_dict)
+    
+    # Check if device with same MAC address already exists
+    existing_device_index = None
+    for i, existing_data in enumerate(submitted_data):
+        if existing_data.get("mac_address") == data.mac_address:
+            existing_device_index = i
+            break
+    
+    if existing_device_index is not None:
+        # Update existing device data
+        submitted_data[existing_device_index].update(data_dict)
+        message = f"Device data updated for MAC address {data.mac_address}"
+        updated_data = submitted_data[existing_device_index]
+    else:
+        # Add new device data
+        submitted_data.append(data_dict)
+        message = f"New device data added for MAC address {data.mac_address}"
+        updated_data = data_dict
+    
     return {
         "status": "success", 
-        "message": "Device data submitted successfully",
-        "data": data_dict,
-        "total_submitted": len(submitted_data)
+        "message": message,
+        "data": updated_data,
+        "total_submitted": len(submitted_data),
+        "is_update": existing_device_index is not None
     }
 
 @app.get("/data")
@@ -102,6 +138,70 @@ def get_submitted_data():
     return {
         "count": len(submitted_data),
         "data": submitted_data
+    }
+
+@app.get("/data/device/{mac_address}")
+def get_device_by_mac(mac_address: str):
+    """Get device data by MAC address"""
+    for device_data in submitted_data:
+        if device_data.get("mac_address") == mac_address:
+            return {
+                "found": True,
+                "data": device_data
+            }
+    
+    raise HTTPException(status_code=404, detail=f"Device with MAC address {mac_address} not found")
+
+@app.post("/ingest")
+def ingest_enriched_packet(packet: EnrichedPacket):
+    """
+    Ingest enriched packet data with coordinates from external sources.
+    Updates existing device if MAC address exists, otherwise creates new entry.
+    """
+    # Convert enriched packet to device data format
+    device_data = {
+        "device_id": packet.device_id or f"DEVICE_{packet.mac_address.replace(':', '_')}",
+        "mac_address": packet.mac_address,
+        "location": {
+            "latitude": packet.latitude,
+            "longitude": packet.longitude
+        },
+        "decibel": packet.decibel_level or packet.noise_level or 0.0,
+        "event": packet.event_type,
+        "timestamp": packet.timestamp or datetime.now().isoformat(),
+        "metadata": packet.metadata
+    }
+    
+    # Check if device with same MAC address already exists
+    existing_device_index = None
+    for i, existing_data in enumerate(submitted_data):
+        if existing_data.get("mac_address") == packet.mac_address:
+            existing_device_index = i
+            break
+    
+    if existing_device_index is not None:
+        # Update existing device data
+        submitted_data[existing_device_index].update(device_data)
+        message = f"Device coordinates and data updated for MAC address {packet.mac_address}"
+        updated_data = submitted_data[existing_device_index]
+        is_update = True
+    else:
+        # Add new device data
+        submitted_data.append(device_data)
+        message = f"New device ingested for MAC address {packet.mac_address}"
+        updated_data = device_data
+        is_update = False
+    
+    return {
+        "status": "success",
+        "message": message,
+        "data": updated_data,
+        "total_devices": len(submitted_data),
+        "is_update": is_update,
+        "coordinates": {
+            "latitude": packet.latitude,
+            "longitude": packet.longitude
+        }
     }
 
 @app.get("/heatmap", response_class=HTMLResponse)
