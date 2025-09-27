@@ -5,38 +5,40 @@ on:
     branches: [main]
     paths:
       - 'Frontend/**'
-      - 'Server/**'  # Assuming Server is your Backend
-  workflow_dispatch:  # Allow manual triggering
+      - 'Server/**'
+      - 'Python-microservice/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
 
 jobs:
   deploy:
     name: Deploy Application
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Rebuild PEM from single-line secret
       - name: Prepare SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/temp_key
-          chmod 600 ~/.ssh/temp_key
-          ssh-keygen -p -m PEM -f ~/.ssh/temp_key -N ""
-          echo "SSH_PRIVATE_KEY_PEM=$(cat ~/.ssh/temp_key)" >> $GITHUB_ENV
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ env.SSH_PRIVATE_KEY_PEM }}
+          ssh-private-key: |
+            ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Add remote server to known_hosts
-        run: |
-          ssh-keyscan -H 82.177.167.151 >> ~/.ssh/known_hosts
+        run: ssh-keyscan -H 82.177.167.151 >> ~/.ssh/known_hosts
 
       - name: Deploy to server
         run: |
-          ssh ubuntu@82.177.167.151 '
+          ssh -o StrictHostKeyChecking=no ubuntu@82.177.167.151 '
             set -e
             cd ECHONET &&
             git fetch origin &&
@@ -46,14 +48,4 @@ jobs:
           '
 
       - name: Verify deployment
-        run: |
-          ssh ubuntu@82.177.167.151 '
-            sudo docker compose ps
-          '
-
-      - name: Cleanup SSH key
-        if: always()
-        run: |
-          # The ssh-agent action handles cleanup, but if you had manual keys:
-          # rm -f ~/.ssh/cloud_rsa
-          echo "SSH key cleanup is handled by ssh-agent action."
+        run: ssh ubuntu@82.177.167.151 'sudo docker compose ps'
