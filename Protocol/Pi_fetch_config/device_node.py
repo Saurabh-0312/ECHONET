@@ -135,7 +135,7 @@ def read_registry():
         print(f"❌ CRITICAL: Could not fetch registry from API: {e}. Exiting.")
         sys.exit(1)
 
-# --- Agent & Peer Configuration ---
+#--- Agent & Peer Configuration ---
 try:
     #MAC_ADDRESS = gma(interface="wlan0") or gma(interface="eth0") or gma()=
     MAC_ADDRESS="00:1A:2B:3C:4D:5E"
@@ -150,6 +150,9 @@ except Exception as e:
     else:
         print("❌ Error: No MAC address found and none provided. Exiting.")
         sys.exit(1)
+# # Hardcoded for testing purposes
+# MAC_ADDRESS = "00:1A:2B:3C:4D:5E" 
+# print(f"✅ Using hardcoded MAC Address for testing: {MAC_ADDRESS}")
 
 ALL_CONFIGS = read_registry()
 if MAC_ADDRESS not in ALL_CONFIGS:
