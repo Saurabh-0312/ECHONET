@@ -1,6 +1,8 @@
 # ECHONET
 
 A decentralized environmental monitoring network built with a microservice architecture on Fluence Network, combining IoT sensors, blockchain protocols, and AI services for transparent environmental data collection and verification.
+![WhatsApp Image 2025-09-27 at 16 08 47](https://github.com/user-attachments/assets/a0d0b6fd-a7f3-46ff-ab49-4af2b887b095)
+
 
 ## Architecture Overview
 
