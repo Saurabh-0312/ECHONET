@@ -1,0 +1,7 @@
+uagents
+cosmpy[full]
+paho-mqtt
+requests
+getmac
+aiohttp
+mnemonic

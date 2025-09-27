@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  echonet-device-node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: echonet-device-node
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    # If you need to pass a MAC address as argument, uncomment and modify:
+    # command: ["python", "device_node.py", "00:1A:2B:3C:4D:5E"]
+    
+    # Network mode for accessing external services
+    network_mode: "host"
+    
+    # Optional: Mount logs directory
+    volumes:
+      - ./logs:/app/logs
+    
+    # Optional: Add logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+    
+    # Optional: Add resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
