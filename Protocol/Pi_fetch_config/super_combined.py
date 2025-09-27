@@ -511,8 +511,9 @@ def mqtt_publisher_thread():
                     
                     # Send to API
                     try:
+                        # Use the expected format based on the original device_node.py
                         api_payload = {
-                            "mac_address": sensor_data["mac_address"],
+                            "deviceId": sensor_data["mac_address"],
                             "timestamp": sensor_data["timestamp"],
                             "decibel": sensor_data["decibel"]
                         }
@@ -520,9 +521,11 @@ def mqtt_publisher_thread():
                         response = requests.post(RAW_DATA_COLLECTOR_URL, json=api_payload, timeout=5)
                         
                         if response.status_code == 200:
-                            print(f"🌐 API Sent: MAC={api_payload['mac_address']}, dB={api_payload['decibel']:.2f}, Time={api_payload['timestamp']}")
+                            print(f"🌐 API Sent: MAC={api_payload['deviceId']}, dB={api_payload['decibel']:.2f}, Time={api_payload['timestamp']}")
                         else:
                             print(f"❌ API Error: Status {response.status_code}")
+                            if response.text:
+                                print(f"   Error details: {response.text}")
                             
                     except requests.exceptions.RequestException as e:
                         print(f"❌ API Request failed: {e}")
