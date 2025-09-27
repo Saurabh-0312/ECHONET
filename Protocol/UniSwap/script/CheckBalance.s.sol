@@ -12,8 +12,8 @@ contract CheckPoolBalance is Script {
     address public constant POOL_MANAGER_ADDRESS = 0xE03A1074c86CFeDd5C142C4F04F1a1536e203543;
 
     // Your deployed token addresses
-    Token public constant TOKEN_A = Token(0x75F3DD83b1eF86C381F3CA8BBe3515fa68252526);
-    Token public constant TOKEN_B = Token(0x1fF1A03729203435BAE7a5B42583493Ee5b4682d);
+    Token public constant TOKEN_A = Token(0xc1d7ea2A94A0bdC8594cA2C485aB93e46e2a593e);
+    Token public constant TOKEN_B = Token(0x1c2e5A8dB0e60eD3747b798e74e8940e4ce4de13);
 
     function run() external view {
         // Get the raw balance of each token held by the PoolManager
