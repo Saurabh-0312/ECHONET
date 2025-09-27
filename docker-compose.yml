@@ -45,6 +45,18 @@ services:
       retries: 3
       start_period: 40s
 
+  fluence-python-worker:
+    build:
+      context: ./Python-microservice
+      dockerfile: Dockerfile
+    image: echonet-fluence-python-worker:latest
+    container_name: fluence-python-worker
+    ports:
+      - "5001:5000"
+    restart: unless-stopped
+    networks:
+      - echonet-network
+
 networks:
   echonet-network:
     driver: bridge
