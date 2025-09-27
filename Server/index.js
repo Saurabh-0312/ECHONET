@@ -17,15 +17,19 @@ app.use(express.json());
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
+
+// Trust proxy for domain setup
+app.set('trust proxy', true);
 
 export const synapse = await Synapse.create({
     privateKey: "b41f796fa90a331fc1ba07b32d8009c61992222c80c74f475a1abcec911b3794", // replace with your private key
     rpcURL: RPC_URLS.calibration.websocket, // testnet
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Use worldcoinRoutes for all /api routes
 app.use('/api/ens', ensRoutes);
