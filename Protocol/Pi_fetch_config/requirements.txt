@@ -1,7 +1,23 @@
+# Core dependencies for ECHONET Super Combined Device Node
+
+# uAgent framework and blockchain
 uagents
 cosmpy[full]
+mnemonic
+
+# Audio processing
+sounddevice
+numpy
+
+# Web framework
+fastapi
+uvicorn[standard]
+
+# Network and messaging
 paho-mqtt
 requests
-getmac
 aiohttp
-mnemonic
+getmac
+
+# Data processing and utilities
+asyncio
