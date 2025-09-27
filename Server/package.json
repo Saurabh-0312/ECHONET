@@ -10,9 +10,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ensdomains/ensjs": "^4.0.2",
+    "@filoz/synapse-sdk": "^0.28.0",
+    "@graphprotocol/grc-20": "^0.25.2",
+    "@worldcoin/idkit": "^2.4.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "graphql-request": "^7.2.0",
+    "viem": "^2.37.8"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

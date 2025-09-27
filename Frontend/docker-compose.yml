@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # Standalone frontend (no backend dependency)
+  frontend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: echonet-frontend:latest
+    container_name: echonet-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - echonet-network
+
+  # Full-stack frontend (with backend proxy)
+  frontend-fullstack:
+    build: 
+      context: .
+      dockerfile: Dockerfile.fullstack
+    image: echonet-frontend:fullstack
+    container_name: echonet-frontend-fullstack
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - echonet-network
+    profiles:
+      - fullstack
+
+  # Example backend service (replace with your actual backend)
+  backend:
+    image: echonet-backend:latest  # Replace with your backend image
+    container_name: echonet-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - echonet-network
+    profiles:
+      - fullstack
+
+  # Development service with hot reload
+  frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: development
+    image: echonet-frontend:dev
+    container_name: echonet-frontend-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    command: npm run dev -- --host 0.0.0.0
+    restart: unless-stopped
+    networks:
+      - echonet-network
+    profiles:
+      - dev
+
+networks:
+  echonet-network:
+    driver: bridge

@@ -1,0 +1,30 @@
+[Unit]
+Description=EchoNet Binary Execution Monitor
+Documentation=https://github.com/Saurabh-0312/ECHONET
+After=multi-user.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+ExecStartPre=/usr/local/bin/pre_exec_monitor.sh setup
+ExecStart=/usr/local/bin/pre_exec_monitor.sh start-monitor
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStop=/usr/local/bin/pre_exec_monitor.sh stop
+PIDFile=/var/run/echonet_monitor.pid
+Restart=always
+RestartSec=5
+User=root
+Group=root
+
+# Security settings
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log /var/run /tmp
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+
+[Install]
+WantedBy=multi-user.target

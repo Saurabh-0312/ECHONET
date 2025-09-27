@@ -1,0 +1,21 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+venv/
+
+# VSCode
+.vscode/
+
+# Secrets
+.env
+private_keys.json
+config/private/
+
+# Frontend builds (if later you use npm)
+frontend/node_modules/
+frontend/dist/
+frontend/build/

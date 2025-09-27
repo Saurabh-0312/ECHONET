@@ -10,20 +10,29 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@graphprotocol/grc-20": "^0.25.2",
     "@radix-ui/react-slot": "^1.2.3",
+    "@rolldown/pluginutils": "^1.0.0-beta.40",
     "@tailwindcss/vite": "^4.1.13",
     "axios": "^1.12.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "ethers": "^6.15.0",
+    "framer-motion": "^12.23.22",
     "gsap": "^3.13.0",
     "lucide-react": "^0.544.0",
     "ogl": "^1.0.11",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-icons": "^5.5.0",
+    "react-is": "^19.1.1",
     "react-router-dom": "^7.9.2",
+    "recharts": "^3.2.1",
+    "rolldown": "^1.0.0-beta.40",
     "simplex-noise": "^4.0.3",
     "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.13"
+    "tailwindcss": "^4.1.13",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

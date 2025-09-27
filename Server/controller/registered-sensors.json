@@ -1,0 +1,40 @@
+[
+  {
+    "id": "00:1A:2B:3C:4D:5E",
+    "deviceId": "00:1A:2B:3C:4D:5E",
+    "name": "00:1A:2B:3C:4D:5E",
+    "type": "Temperature",
+    "location": "delhi",
+    "locality": "kota",
+    "latitude": "23.282",
+    "longitude": "-10.543",
+    "dataType": "DB",
+    "project": "Echonet",
+    "ownerAddress": "0xb5f278f22c5e5c42174fc312cc593493d2f3570d",
+    "description": "Sensor 00:1A:2B:3C:4D:5E at delhi",
+    "timestamp": "2025-09-27T11:55:16.585Z",
+    "status": "active",
+    "hypergraphEntityId": "93707f6b-e4d3-4397-abd5-e347290e7cc0",
+    "hypergraphCID": "ipfs://bafkreigmleaeyhjb6l2il6vrrrnaqtolypv5ao6k4yhllsyvdd7clrkrge",
+    "hypergraphEditId": "96bf5a5a-9a33-4430-b643-6c2230d37560"
+  },
+  {
+    "id": "00:1A:2B:3C:4D:5A",
+    "deviceId": "00:1A:2B:3C:4D:5A",
+    "name": "00:1A:2B:3C:4D:5A",
+    "type": "Temperature",
+    "location": "Delhi",
+    "locality": "Yashobhoomi",
+    "latitude": "23.901",
+    "longitude": "-20.213",
+    "dataType": "DB",
+    "project": "Echonet",
+    "ownerAddress": "0xb5f278f22c5e5c42174fc312cc593493d2f3570d",
+    "description": "Sensor 00:1A:2B:3C:4D:5A at Delhi",
+    "timestamp": "2025-09-27T14:19:06.861Z",
+    "status": "active",
+    "hypergraphEntityId": "3622adf0-3f9f-4949-bc11-df59b2699752",
+    "hypergraphCID": "ipfs://bafkreieu6szfjf7rg5g4c2uql2efqvhe4lfxpuyziy4mfbbyjmirdcevvy",
+    "hypergraphEditId": "66c60264-e2a5-493c-aa63-67861a2f4a34"
+  }
+]

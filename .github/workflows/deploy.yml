@@ -1,0 +1,58 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Frontend/**'
+      - 'Server/**'
+      - 'Python-microservice/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          # Decode the base64 one-line private key
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          # Start ssh-agent and add the key
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+          # Add server host to known_hosts
+          ssh-keyscan -H 82.177.167.151 >> ~/.ssh/known_hosts
+
+          # Generate public key from private key
+          ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+
+          # Try installing public key on server (only needed first run)
+          # Requires you to allow password login temporarily OR already have another key that works
+          if ! ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ubuntu@82.177.167.151 true 2>/dev/null; then
+            echo "⚠️ Attempting to install public key on server..."
+            # You’ll be prompted for server password the first run
+            cat ~/.ssh/id_rsa.pub | ssh -o StrictHostKeyChecking=no ubuntu@82.177.167.151 "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+          fi
+
+      - name: Deploy to server
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@82.177.167.151 '
+            set -e
+            cd ECHONET &&
+            git fetch origin &&
+            git reset --hard origin/main &&
+            sudo docker container prune &&
+            sudo docker compose up --build -d --force-recreate
+          '
+
+      - name: Verify deployment
+        run: ssh ubuntu@82.177.167.151 'cd ECHONET && sudo docker-compose ps'

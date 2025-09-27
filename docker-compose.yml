@@ -1,0 +1,62 @@
+services:
+  # Frontend Service - React App with Nginx
+  frontend:
+    build: 
+      context: ./Frontend
+      dockerfile: Dockerfile
+    image: echonet-frontend:latest
+    container_name: echonet-frontend
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+      - VITE_BACKEND_URL_DOCKER=http://backend:3001
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - echonet-network
+
+  # Backend Service - Main Node.js API Server
+  backend:
+    build: 
+      context: ./Server
+      dockerfile: Dockerfile
+    image: echonet-backend:latest
+    container_name: echonet-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - CORS_ORIGIN=http://localhost:3000
+    env_file:
+      - ./Server/.env
+    restart: unless-stopped
+    networks:
+      - echonet-network
+    volumes:
+      - ./Server:/app
+      - /app/node_modules
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  fluence-python-worker:
+    build:
+      context: ./Python-microservice
+      dockerfile: Dockerfile
+    image: echonet-fluence-python-worker:latest
+    container_name: fluence-python-worker
+    ports:
+      - "5001:5000"
+    restart: unless-stopped
+    networks:
+      - echonet-network
+
+networks:
+  echonet-network:
+    driver: bridge
