@@ -1,37 +1,56 @@
-import React, { useState } from 'react';
-import DeviceList from '../components/marketplace/DeviceList.jsx';
-import DataList from '../components/marketplace/DataList.jsx';
+import React, { useState } from "react";
+import DeviceList from "../components/marketplace/DeviceList.jsx";
+import DataList from "../components/marketplace/DataList.jsx";
+import { ChevronDown } from "lucide-react";
 
 const Market = () => {
-  const [activeTab, setActiveTab] = useState('devices');
+  const [selectedMarketplace, setSelectedMarketplace] = useState("devices");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const tabStyle = "px-6 py-2 text-lg font-semibold rounded-t-lg transition-colors duration-300";
-  const activeTabStyle = "bg-white text-blue-600 shadow-md";
-  const inactiveTabStyle = "bg-blue-500 text-white hover:bg-blue-600";
+  const marketplaceOptions = [
+    { value: "devices", label: "Devices" },
+    { value: "data", label: "Data Streams" },
+  ];
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4 sm:p-8">
-      <div className="container mx-auto">
-        <h1 className="text-4xl font-bold text-gray-800 text-center mb-8">DePIN Marketplace</h1>
-        
-        <div className="flex border-b border-gray-200">
+    <div className="bg-black min-h-screen">
+      <div className="container mx-auto w-[90%] md:w-[85%] lg:w-[80%] max-w-7xl pt-28">
+        {/* Marketplace Selector */}
+        <div className="relative mb-8">
           <button
-            onClick={() => setActiveTab('devices')}
-            className={`${tabStyle} ${activeTab === 'devices' ? activeTabStyle : inactiveTabStyle}`}
+            className="flex items-center justify-between w-full bg-neutral-900 text-white px-5 py-3 rounded-xl shadow-md border border-gray-700 hover:bg-neutral-800 transition-colors"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            <i className="fas fa-satellite-dish mr-2"></i>Devices
+            <span className="text-lg font-semibold">
+              {marketplaceOptions.find((opt) => opt.value === selectedMarketplace)?.label}
+            </span>
+            <ChevronDown className={`transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
           </button>
-          <button
-            onClick={() => setActiveTab('data')}
-            className={`${tabStyle} ${activeTab === 'data' ? activeTabStyle : inactiveTabStyle}`}
-          >
-            <i className="fas fa-chart-line mr-2"></i>Data Streams
-          </button>
+
+          {isDropdownOpen && (
+            <div className="absolute mt-2 w-full bg-neutral-900 border border-gray-700 rounded-xl shadow-lg overflow-hidden">
+              {marketplaceOptions.map((option) => (
+                <button
+                  key={option.value}
+                  className={`w-full text-left px-5 py-3 text-white hover:bg-neutral-700 transition-colors ${
+                    selectedMarketplace === option.value ? "bg-neutral-800" : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedMarketplace(option.value);
+                    setIsDropdownOpen(false);
+                  }}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="bg-white p-4 sm:p-8 rounded-b-lg rounded-r-lg shadow-lg">
-          {activeTab === 'devices' && <DeviceList />}
-          {activeTab === 'data' && <DataList />}
+        {/* Marketplace Content */}
+        <div className="bg-neutral-950 p-6 sm:p-10 rounded-2xl shadow-xl border border-gray-700">
+          {selectedMarketplace === "devices" && <DeviceList />}
+          {selectedMarketplace === "data" && <DataList />}
         </div>
       </div>
     </div>

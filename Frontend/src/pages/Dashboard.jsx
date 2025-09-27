@@ -9,6 +9,7 @@ import Exchange from '../components/exchange/ExchangeCurrency.jsx';
 import UserDashboard from '@/components/dashboard/main/UserDashboard.jsx';
 import Market from './Market.jsx';
 import HyperGraphDevice from './HyperGraphDevice.jsx';
+import About from './About.jsx'
 
 function DashboardPage() {
     const {isRegistered,ensName } = useAuth();
@@ -42,6 +43,7 @@ function DashboardPage() {
                         <Route path="/exchange" element={<Exchange />} />
                         <Route path="/market" element={<Market />} />
                         <Route path="/hypergraph" element={<HyperGraphDevice />} />
+                        <Route path="/about" element={<About />} />
                     </Routes>
                 </div>
             </main>
