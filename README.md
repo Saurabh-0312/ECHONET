@@ -2,19 +2,25 @@
 
 **A comprehensive decentralized environmental monitoring ecosystem** that combines IoT sensors, multi-blockchain protocols, AI/ML services, and distributed computing to create a transparent, incentivized network for environmental data collection, verification, and analysis.
 
-ECHONET leverages cutting-edge technologies including **Fluence Network** for serverless microservices, **Polygon** smart c## 🚀 Key Features
+ECHONET leverages cutting-edge technologies including **Fetch.AI** autonomous agents for consensus validation, **Polygon** smart contracts for tokenomics, **IPFS/Filecoin** for decentralized storage, and real-time **MQTT** communication for sensor networks.
+
+![ECHONET Dashboard](https://github.com/user-attachments/assets/a0d0b6fd-a7f3-46ff-ab49-4af2b887b095)
+
+## 🚀 Key Features
 
 ### 🌍 Environmental Monitoring
-- **IoT Sensor Network**: Distributed environmental sensors with AI-powered audio analysis
-- **Real-time Data Streaming**: WebSocket-based live sensor data feeds
-- **Geographic Visualization**: Interactive maps showing sensor locations and data
-- **Data Validation**: Fetch.AI autonomous agents verify sensor authenticity
+- **IoT Sensor Network**: Distributed audio sensors with real-time decibel monitoring
+- **Real-time Data Streaming**: MQTT-based sensor communication + FastAPI SSE streams
+- **Geographic Validation**: Location-based consensus using GPS coordinates
+- **Peer-to-Peer Verification**: Fetch.AI autonomous agents validate sensor data authenticity
+- **Audio Processing**: Real-time RMS/dB calculation with CSV logging and ASCII visualization
 
 ### ⛓️ Multi-Blockchain Architecture  
-- **Polygon Integration**: EVM-compatible smart contracts for tokenomics and staking
-- **Fetch.AI Agents**: Autonomous validation and reputation systems
-- **Filecoin Storage**: Decentralized, immutable data storage via IPFS
-- **Cross-chain Compatibility**: Seamless interaction between different protocols
+- **Polygon Smart Contracts**: EVM-compatible contracts for tokenomics and staking
+- **Fetch.AI Agent Network**: Autonomous consensus validation with cryptographic signatures
+- **IPFS/Filecoin Storage**: Decentralized data storage with CID-based retrieval
+- **MQTT Broker Integration**: HiveMQ for real-time sensor communication
+- **Cross-chain Data Flow**: Seamless data pipeline from sensors to blockchain
 
 ### 🔐 Identity & Security
 - **WorldCoin Verification**: Human-proof identity system integration
@@ -99,10 +105,12 @@ terraform apply
 - **Foundry** - Smart contract development and testing
 
 ### Hardware & IoT
-- **Python 3.x** - IoT sensor programming and data processing
-- **PyTorch & Transformers** - AI/ML for audio analysis
-- **SoundDevice & LibROSA** - Audio processing and analysis
-- **FastAPI** - High-performance Python web framework
+- **Python 3.x** - IoT sensor programming and real-time audio processing
+- **SoundDevice & NumPy** - Real-time audio capture and RMS/dB calculation
+- **FastAPI** - High-performance async web framework for sensor APIs
+- **MQTT (Paho)** - Message queuing for sensor network communication
+- **GetMac** - Automatic MAC address detection for device identification
+- **Fetch.AI uAgents** - Autonomous agent framework for consensus protocols
 - **Rust** - High-performance kernel monitoring (Raspberry Pi)
 
 ### Infrastructure & DevOps
@@ -183,8 +191,8 @@ ECHONET leverages a distributed microservice architecture deployed on **Fluence 
 │   └── Dockerfile            # Python service containerization
 │
 ├── Hardware/                    # 🔧 IoT Sensor Infrastructure
-│   ├── combined.py            # Main sensor data collection script
-│   ├── sound-input.py         # Audio sensor processing
+│   ├── combined.py            # Audio monitoring + FastAPI streaming
+│   ├── sound-input.py         # Audio sensor processing utilities
 │   ├── stream.py              # Real-time data streaming
 │   ├── requirements.txt       # Python ML/IoT dependencies
 │   └── kernel_monitoring/     # Rust-based system monitoring
@@ -193,6 +201,11 @@ ECHONET leverages a distributed microservice architecture deployed on **Fluence 
 │       └── RASPBERRY_PI_SETUP.md # Hardware setup guide
 │
 ├── Protocol/                    # ⛓️ Multi-Blockchain Integration
+│   ├── Pi_fetch_config/       # 🎯 **MAIN SENSOR NODE IMPLEMENTATION**
+│   │   ├── super_combined.py  # **Complete device node with all features**
+│   │   ├── device_node.py     # Fetch.AI agent + MQTT + consensus logic
+│   │   ├── combined.py        # Audio monitoring + FastAPI streaming
+│   │   └── requirements.txt   # All sensor node dependencies
 │   ├── Polygon/               # Ethereum-compatible smart contracts
 │   │   ├── src/               # Solidity contracts (EchoNetToken, MainContract)
 │   │   ├── script/            # Foundry deployment scripts
@@ -238,7 +251,8 @@ Before running ECHONET, ensure you have the following installed:
 - **Python 3.8+** with **pip**
 - **Git** for cloning the repository
 - **MetaMask** or compatible Web3 wallet
-- **Terraform** (for Fluence deployment)
+- **Audio Input Device** (USB microphone or system audio)
+- **Fetch.AI AgentVerse Account** for agent mailbox configuration
 
 ### Quick Start with Docker
 
@@ -281,10 +295,39 @@ cd ../Python-microservice
 pip install -r requirements.txt
 uvicorn index:app --reload --port 8000
 
-# 4. Setup Hardware/IoT (optional, new terminal)
-cd ../Hardware
+# 4. Setup Sensor Node (new terminal) - MAIN COMPONENT
+cd ../Protocol/Pi_fetch_config
 pip install -r requirements.txt
-python combined.py
+
+# Option A: Run complete sensor node with all features
+python super_combined.py
+
+# Option B: Run individual components
+python combined.py      # Audio monitoring only
+python device_node.py   # Agent consensus only
+```
+
+### 🎯 Super Combined Sensor Node
+
+The `super_combined.py` script is the **complete sensor node implementation** that includes:
+
+- **🎤 Real-time Audio Processing**: Captures audio, calculates dB levels
+- **📡 MQTT Communication**: Publishes data every 2 seconds to HiveMQ broker
+- **🤖 Fetch.AI Agent Network**: Autonomous consensus validation with peer verification
+- **🌐 FastAPI Web Interface**: Real-time streaming API and status endpoints
+- **🔗 API Integration**: Sends validated data to external collectors
+- **💾 Local Logging**: CSV file logging with timestamps
+
+```bash
+# Run the complete sensor node
+cd Protocol/Pi_fetch_config
+python super_combined.py [optional_mac_address]
+
+# Outputs:
+# 🎤 Audio processing started...
+# 📡 MQTT Publisher connected successfully
+# 🌐 FastAPI server on http://0.0.0.0:5007
+# 🤖 Agent running with consensus validation
 ```
 
 ### Environment Configuration
@@ -305,14 +348,40 @@ ETHEREUM_NODE_URL=your_rpc_url
 PORT=3001
 ```
 
-**Protocol/Fetch.AI/.env:**
-```bash
-WEB3_STORAGE_TOKEN=your_web3_storage_token
-ETHEREUM_NODE_URL=your_ethereum_rpc
-ECHONET_STAKING_CONTRACT_ADDRESS=your_contract_address
-CONTRACT_OWNER_PRIVATE_KEY=your_private_key
-GITHUB_PAT=your_github_token
-ASI_API_KEY=your_asi_api_key
+**Protocol/Pi_fetch_config Configuration:**
+
+Edit the hardcoded configuration section in `super_combined.py`:
+
+```python
+# ======================================================================================
+# --- HARDCODED CONFIGURATION ---
+# ❗️ EDIT THE VALUES IN THIS SECTION ❗️
+# ======================================================================================
+
+# 1. Your central Flask server API
+API_BASE_URL = "https://fetch-dev.onrender.com"
+
+# 2. Your Agentverse API Key from https://agentverse.ai
+AGENTVERSE_API_KEY = "your_agentverse_api_key_here"
+
+# 3. External data ingestion API
+EXTERNAL_INGEST_API_URL = "http://82.177.167.151:5001/ingest"
+
+# 4. Raw data collector API
+RAW_DATA_COLLECTOR_URL = "http://82.177.167.151:3001/api/sensor"
+
+# 5. MQTT Broker (usually no change needed)
+MQTT_BROKER = "broker.hivemq.com"
+MQTT_PORT = 1883
+
+# 6. Audio settings (adjust for your microphone)
+SAMPLERATE = 48000
+BLOCKSIZE = 1024
+CHANNELS = 1
+
+# 7. FastAPI settings
+FASTAPI_HOST = "0.0.0.0"
+FASTAPI_PORT = 5007
 ```
 
 ### Smart Contract Deployment
@@ -354,47 +423,100 @@ docker-compose logs backend
 docker-compose logs python-service
 ```
 
-## 🌐 Fluence Network Integration
+## � Sensor Node Architecture
 
-**Fluence** provides the decentralized computing infrastructure that powers ECHONET's microservices:
+**ECHONET's core innovation is the distributed sensor node network** powered by Fetch.AI autonomous agents:
 
-- **Serverless Architecture**: Services run on a peer-to-peer network without centralized servers
-- **Service Discovery**: Automatic discovery and load balancing across Fluence peers
-- **Fault Tolerance**: Built-in redundancy and resilience through distributed execution
-- **Cost Efficiency**: Pay-per-use model with no infrastructure overhead
-- **Scalability**: Automatic scaling based on demand across the network
+### 🤖 Fetch.AI Agent Consensus System
 
-### 🔧 Deployment with Terraform
+- **Peer-to-Peer Validation**: Agents validate each other's sensor data using proximity algorithms
+- **Geographic Grid System**: Location-based grouping for efficient consensus (0.1° grid squares)
+- **Smart Consensus Logic**: Haversine distance + sound attenuation calculations
+- **Cryptographic Signatures**: Ed25519 signatures for tamper-proof validation
+- **Failure Handling**: Automatic stake slashing for sensors that consistently fail validation
 
-Our Fluence services are managed as Infrastructure as Code using Terraform:
+### 📡 Real-time Communication Pipeline
 
-```bash
-cd Deployment-Fluence/
-terraform init
-terraform plan
-terraform apply
+```
+🎤 Audio Input → 🔢 dB Processing → 📦 MQTT Queue → 🌐 Network Broadcast
+                                         ↓
+🤖 Agent Validation ← 🔐 Cryptographic Verification ← 👥 Peer Consensus
+                                         ↓
+📊 External APIs ← 💾 IPFS Storage ← ✅ Validated Data
 ```
 
-This deploys all ECHONET microservices to the Fluence network with:
-- Automatic service registration and discovery
-- Environment-specific configurations
-- Resource allocation and monitoring
-- Service mesh connectivity
+### 🏗️ Multi-threaded Architecture
 
-## � API Documentation
+1. **Main Thread**: Fetch.AI agent execution (blocking event loop)
+2. **Audio Thread**: Real-time audio capture and dB calculation
+3. **MQTT Publisher**: Publishes sensor data every 2 seconds
+4. **MQTT Subscriber**: Listens for peer sensor data
+5. **FastAPI Thread**: Web server for status monitoring and streaming
 
-ECHONET provides a comprehensive RESTful API through multiple microservices:
+### 🔧 Deployment Options
 
-### Core API Endpoints
+**Option 1: Terraform Infrastructure (Advanced)**
+```bash
+cd Deployment-Fluence/
+terraform init && terraform apply
+# Deploys to distributed infrastructure
+```
 
-**Base URL:** `http://localhost:3001` (development) or your deployed backend URL
+**Option 2: Direct Sensor Node (Recommended)**
+```bash
+cd Protocol/Pi_fetch_config/
+python super_combined.py
+# Runs complete sensor node locally
+```
 
-#### Sensor Management
+## 📡 API Documentation
+
+ECHONET provides multiple API interfaces for different use cases:
+
+### 🎯 Sensor Node APIs (super_combined.py)
+
+**FastAPI Server:** `http://localhost:5007` (or your device IP)
+
+#### Real-time Streaming
 ```http
-POST   /api/sensors/register     # Register new IoT sensor device
-GET    /api/sensors/data        # Retrieve sensor data
-POST   /api/sensors/data        # Submit new sensor readings
-GET    /api/sensors/status      # Check sensor health status
+GET    /stream                  # Server-Sent Events stream of audio data
+GET    /status                  # Current device status and metrics
+GET    /health                  # Health check endpoint
+```
+
+**Example SSE Stream Response:**
+```json
+{
+  "avg_db": 45.32,
+  "mac_address": "2c:cf:67:c5:6b:63", 
+  "timestamp": "2025-09-27T19:13:05.554833",
+  "agent_address": "agent1qthegeucnx2gj0w8agu0xfhpf7lyjq5l8n3e89nqxhv8gvry2nwhk2hsytn",
+  "agent_name": "worker_agent_4"
+}
+```
+
+#### MQTT Topics
+```
+# Publishing sensor data
+echonet/sensors/{MAC_ADDRESS}
+
+# Payload format:
+{
+  "mac_address": "2c:cf:67:c5:6b:63",
+  "timestamp": "2025-09-27T19:13:05.554833", 
+  "decibel": 45.32
+}
+```
+
+### 🌐 Backend API Endpoints
+
+**Base URL:** `http://localhost:3001` (development)
+
+#### Sensor Data Collection
+```http
+POST   /api/sensor              # Submit sensor readings (from devices)
+GET    /registry                # Get sensor registry and configurations
+POST   /request-slash           # Request stake slashing for failed sensors
 ```
 
 #### Identity & Authentication  
@@ -402,14 +524,6 @@ GET    /api/sensors/status      # Check sensor health status
 POST   /api/worldcoin/verify    # Verify WorldCoin identity proof
 POST   /api/ens/resolve         # Resolve ENS name to address
 POST   /api/ens/reverse         # Reverse resolve address to ENS name
-```
-
-#### Staking & Rewards
-```http
-POST   /api/stake/deposit       # Stake ECHO tokens
-POST   /api/stake/withdraw      # Withdraw staked tokens  
-GET    /api/stake/balance       # Check staking balance
-GET    /api/stake/rewards       # Get pending rewards
 ```
 
 #### Storage & IPFS
@@ -420,14 +534,7 @@ POST   /api/cid/pin             # Pin important data
 DELETE /api/cid/unpin/:cid      # Unpin data from storage
 ```
 
-#### Analytics & Querying
-```http
-GET    /api/hypergraph/sensors  # Query sensor data via The Graph
-GET    /api/hypergraph/analytics # Get environmental analytics
-POST   /api/hypergraph/query    # Custom GraphQL queries
-```
-
-### Python Microservice Endpoints
+### 🐍 Python Microservice
 
 **Base URL:** `http://localhost:8000`
 
@@ -438,28 +545,30 @@ GET    /health                  # Service health check
 GET    /docs                    # FastAPI interactive documentation
 ```
 
-### Fetch.AI Agent Endpoints
+### 📊 Real-time Data Streaming
 
-**Base URL:** `http://localhost:5000`
+**Server-Sent Events (SSE):**
+```javascript
+// Connect to sensor node stream
+const eventSource = new EventSource('http://192.168.1.100:5007/stream');
 
-```http
-POST   /register               # Register sensor with agents
-GET    /agents/status          # Check agent network status  
-POST   /validate/data          # Submit data for agent validation
-GET    /reputation/:sensor_id  # Get sensor reputation score
+eventSource.onmessage = (event) => {
+  const sensorData = JSON.parse(event.data);
+  console.log(`Sensor ${sensorData.mac_address}: ${sensorData.avg_db} dB`);
+};
 ```
 
-### WebSocket Connections
-
-Real-time data streaming is available via WebSocket:
-
+**MQTT Subscription:**
 ```javascript
-// Frontend WebSocket example
-const ws = new WebSocket('ws://localhost:3001/ws/sensors');
-ws.onmessage = (event) => {
-  const sensorData = JSON.parse(event.data);
-  // Handle real-time sensor updates
-};
+// Using MQTT.js client
+const mqtt = require('mqtt');
+const client = mqtt.connect('mqtt://broker.hivemq.com:1883');
+
+client.subscribe('echonet/sensors/+');
+client.on('message', (topic, message) => {
+  const data = JSON.parse(message.toString());
+  console.log('Received sensor data:', data);
+});
 ```
 
 ### Error Handling
@@ -475,11 +584,51 @@ All APIs use consistent error response format:
 }
 ```
 
-## �🚀 Key Features
+## 🎯 Complete Deployment Example
 
-- **Decentralized Data Collection**: IoT sensors managed through distributed services
-- **Multi-Chain Support**: Seamless integration across Polygon, Filecoin, and Fetch.AI
-- **Identity Verification**: WorldCoin integration for human verification
-- **Distributed Storage**: IPFS/Filecoin for immutable data storage
-- **Real-time Analytics**: HyperGraph-powered environmental insights
-- **Staking Economy**: Token-based incentive mechanisms for data contributors
+### Quick Start: Run a Complete Sensor Node
+
+```bash
+# 1. Clone repository
+git clone https://github.com/Saurabh-0312/ECHONET.git
+cd ECHONET
+
+# 2. Setup sensor node
+cd Protocol/Pi_fetch_config
+pip install -r requirements.txt
+
+# 3. Configure your settings in super_combined.py
+# - Add your Agentverse API key
+# - Register your device MAC address via web UI
+# - Configure API endpoints
+
+# 4. Run complete sensor node
+python super_combined.py
+
+# Expected output:
+# ✅ Automatically detected MAC Address: 2c:cf:67:c5:6b:63
+# ✅ Successfully fetched registry from API
+# 🎤 Audio processing started...
+# 📡 MQTT Publisher connected successfully  
+# 🌐 FastAPI server on http://0.0.0.0:5007
+# 🤖 Agent running with consensus validation
+```
+
+### 📊 Key System Outputs
+
+- **Real-time dB Monitoring**: ASCII visualization + numeric values
+- **MQTT Publishing**: Every 2 seconds to `echonet/sensors/{MAC}`
+- **API Data Submission**: Validated data sent to collector APIs
+- **Peer Consensus**: Fetch.AI agents validate neighboring sensor data
+- **Web Interface**: Status dashboard at `http://device_ip:5007/status`
+
+### 🚀 Production Features
+
+- **Autonomous Operation**: Runs 24/7 with automatic error recovery
+- **Peer-to-Peer Validation**: No single point of failure for data validation  
+- **Multi-threaded Architecture**: Concurrent audio, MQTT, agent, and web processing
+- **Geographic Consensus**: Location-based validation using GPS coordinates
+- **Cryptographic Security**: Ed25519 signatures for all agent communications
+- **Token Economics**: Automatic stake slashing for sensors that fail validation consistently
+- **Real-time Streaming**: Multiple APIs for data consumption (SSE, MQTT, REST)
+- **Cross-platform Support**: Runs on Raspberry Pi, desktop, or cloud instances
