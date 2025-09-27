@@ -20,21 +20,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Rebuild PEM from single-line secret
-      - name: Prepare SSH Key
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
+          # Decode the base64 one-line private key
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-
-      - name: Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: |
-            ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Add remote server to known_hosts
-        run: ssh-keyscan -H 82.177.167.151 >> ~/.ssh/known_hosts
+          # Start ssh-agent and add the key
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_rsa
+          # Add server host to known_hosts
+          ssh-keyscan -H 82.177.167.151 >> ~/.ssh/known_hosts
 
       - name: Deploy to server
         run: |
