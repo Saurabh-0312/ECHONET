@@ -3,11 +3,10 @@ pragma solidity ^0.8.20;
 
 import "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "lib/openzeppelin-contracts/contracts/access/Ownable.sol";
+/// @title EchoNetToken - ERC20 token with public mint/burn for demonstration (no admin)
 
-/// @title EchoNetToken - ERC20 token where only the owner can mint and burn tokens
-contract Token is ERC20, ERC20Burnable, Ownable {
-    constructor(string memory name, string memory symbol) ERC20(name, symbol) Ownable(msg.sender) {
+contract Token is ERC20, ERC20Burnable {
+    constructor(string memory name, string memory symbol) ERC20(name, symbol) {
         // Optionally, mint initial tokens to owner
         _mint(msg.sender, 100000 * 10 ** decimals());
     }

@@ -1,0 +1,45 @@
+type ReadingSubmitted @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  ipfsCID: String! # string
+  rewardAmount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type RewardMinted @entity(immutable: true) {
+  id: Bytes!
+  to: Bytes! # address
+  amount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SensorDeregistered @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type SensorRegistered @entity(immutable: true) {
+  id: Bytes!
+  owner: Bytes! # address
+  deviceId: String! # string
+  stakeAmount: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type StakeSlashed @entity(immutable: true) {
+  id: Bytes!
+  sensorAddress: Bytes! # address
+  userStake: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
