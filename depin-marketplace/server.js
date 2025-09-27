@@ -4,7 +4,10 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { ethers } from "ethers";
 import { paymentMiddleware } from "x402-express";
-import fetch from "x402-fetch";
+import { wrapFetchWithPayment, decodeXPaymentResponse } from "x402-fetch";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { polygonAmoy } from "viem/chains";
 
 // --- 1. INITIAL SETUP ---
 dotenv.config();
@@ -321,72 +324,125 @@ app.get("/market", async (req, res) => {
     console.log(`Attempting to buy data from: ${targetUrl}`);
     console.log("Making payment request...");
 
-    // Create buyer wallet from private key
-    const buyerWallet = new ethers.Wallet(process.env.BUYER_WALLET_PRIVATE_KEY);
-    
-    // Make the payment request using x402-fetch
-    const response = await fetch(targetUrl, {
-      wallet: buyerWallet,
-      tokenAddress: process.env.PAYMENT_TOKEN_ADDRESS,
-      rpcUrl: process.env.RPC_URL,
-      facilitatorUrl: process.env.FACILITATOR_URL
+    // Setup buyer's wallet - exactly like the working client
+    const account = privateKeyToAccount(process.env.BUYER_WALLET_PRIVATE_KEY);
+    const client = createWalletClient({
+      account,
+      chain: polygonAmoy,
+      transport: http(),
     });
+    console.log(`Client wallet address: ${client.account.address}`);
+
+    // Wrap fetch with payment logic - exactly like the working client
+    const fetchWithPayment = wrapFetchWithPayment(fetch, client);
+    
+    // Make the payment request
+    const response = await fetchWithPayment(targetUrl, { method: "GET" });
 
     console.log(`Response status: ${response.status}`);
     
     // Get headers object
-    const headers = {};
-    response.headers.forEach((value, key) => {
-      headers[key] = value;
-    });
+    const headers = Object.fromEntries(response.headers);
     console.log("Response headers:", headers);
 
-    // Get response text
-    const responseText = await response.text();
-    console.log(`Raw response text length: ${responseText.length}`);
-    console.log(`Raw response text: ${JSON.stringify(responseText)}`);
+    if (!response.ok) {
+      let errorBody;
+      try {
+        const responseText = await response.text();
+        console.log(`Raw error response: ${responseText}`);
+        errorBody = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error("Failed to parse error response:", parseError.message);
+        errorBody = { error: "Unable to parse error response" };
+      }
+      
+      return res.status(response.status).json({
+        error: "Payment or data retrieval failed",
+        status: response.status,
+        details: errorBody
+      });
+    }
 
-    if (response.ok) {
+    // Handle successful response
+    let responseText;
+    try {
+      responseText = await response.text();
+      console.log(`Raw response text length: ${responseText.length}`);
+      console.log(`Raw response text: ${JSON.stringify(responseText)}`);
+
+      // Check for non-ASCII characters that might cause JSON parsing issues
+      for (let i = 0; i < responseText.length; i++) {
+        const charCode = responseText.charCodeAt(i);
+        if (charCode > 127) {
+          const char = responseText.charAt(i);
+          console.log(
+            `Non-ASCII character found at position ${i}: "${char}" (code: ${charCode})`
+          );
+        }
+      }
+
       const data = JSON.parse(responseText);
       console.log("\n✅ SUCCESS! Data Purchased:");
       console.log(data);
-      
-      // Get payment info from headers
-      const paymentHeader = response.headers.get('x-payment-response');
-      if (paymentHeader) {
-        console.log(`Payment header raw value: ${JSON.stringify(paymentHeader)}`);
-        
-        try {
-          const paymentInfo = JSON.parse(Buffer.from(paymentHeader, 'base64').toString());
-          console.log("Payment info:", paymentInfo);
-          
-          return res.status(200).json({
-            success: true,
-            data: data,
-            paymentInfo: paymentInfo,
-            message: "Data successfully purchased from marketplace"
-          });
-        } catch (e) {
-          console.log("Could not decode payment header:", e.message);
+
+      // The server includes payment confirmation in a response header
+      let paymentInfo = null;
+      try {
+        const paymentHeaderValue = response.headers.get("x-payment-response");
+        console.log(`Payment header raw value: ${JSON.stringify(paymentHeaderValue)}`);
+
+        if (paymentHeaderValue) {
+          paymentInfo = decodeXPaymentResponse(paymentHeaderValue);
+          if (paymentInfo) {
+            console.log("\n🧾 Payment Receipt:");
+            console.log(
+              `  Transaction Hash: https://www.oklink.com/amoy/tx/${paymentInfo.txHash}`
+            );
+          }
+        } else {
+          console.log("No payment response header found");
         }
+      } catch (paymentError) {
+        console.error("Error decoding payment response:", paymentError.message);
+        console.log(
+          "This doesn't affect the data purchase - the payment was successful"
+        );
       }
-      
+
       return res.status(200).json({
         success: true,
         data: data,
+        paymentInfo: paymentInfo,
         message: "Data successfully purchased from marketplace"
       });
-    } else {
-      console.error(`❌ Failed to purchase data. Status: ${response.status}`);
-      return res.status(response.status).json({
-        error: "Failed to purchase data",
-        status: response.status,
-        response: responseText
+
+    } catch (parseError) {
+      console.error("JSON Parse Error:", parseError.message);
+      console.error("Failed to parse response as JSON");
+      return res.status(500).json({
+        error: "Invalid JSON response from data endpoint",
+        details: parseError.message,
+        rawResponse: responseText
       });
     }
 
   } catch (error) {
-    console.error("❌ Market endpoint error:", error);
+    console.error("\n❌ ERROR during market purchase:", error.message);
+    
+    // If the error object has more details from the server, log them
+    if (error.response) {
+      try {
+        const errorDetails = await error.response.json();
+        console.error("Server Response:", errorDetails);
+        return res.status(500).json({
+          error: "Market purchase failed with server error",
+          details: errorDetails
+        });
+      } catch (e) {
+        console.error("Could not parse server response as JSON");
+      }
+    }
+    
     return res.status(500).json({ 
       error: "Failed to execute market purchase", 
       details: error.message 

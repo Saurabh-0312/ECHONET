@@ -4,8 +4,8 @@ FROM node:20-alpine
 # Set working directory inside container
 WORKDIR /app
 
-# Install Python and build tools for native dependencies
-RUN apk add --no-cache python3 make g++ python3-dev py3-setuptools
+# Install Python and build tools for native dependencies, plus curl for health checks
+RUN apk add --no-cache python3 make g++ python3-dev py3-setuptools curl
 
 # Copy package.json and package-lock.json (if available)
 COPY package*.json ./
