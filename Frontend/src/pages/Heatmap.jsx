@@ -34,7 +34,7 @@ function Heatmap() {
 
   async function fetchData() {
     try {
-      const res = await fetch('/heatmap/data');
+      const res = await fetch('http://82.177.167.151:5001/heatmap/data');
       const json = await res.json();
       setData(json.data || []);
       setSubmittedCount(json.submitted || 0);
