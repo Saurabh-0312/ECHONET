@@ -50,6 +50,7 @@ jobs:
             cd ECHONET &&
             git fetch origin &&
             git reset --hard origin/main &&
+            sudo docker container prune &&
             sudo docker compose up --build -d --force-recreate
           '
 
