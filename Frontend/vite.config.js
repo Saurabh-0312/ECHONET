@@ -11,4 +11,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ['ox']
+  },
+  build: {
+    rollupOptions: {
+      external: (id) => {
+        // Don't externalize ox when it's imported by permissionless
+        return false;
+      }
+    }
+  }
 })

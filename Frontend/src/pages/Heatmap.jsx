@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-
-// Note: Leaflet CSS/JS are loaded from CDN inside this component when it mounts.
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 function Heatmap() {
   const mapRef = useRef(null);
   const [data, setData] = useState([]);
@@ -10,24 +10,14 @@ function Heatmap() {
   const searchMarkerRef = useRef(null);
 
   useEffect(() => {
-    // load leaflet css
-    const css = document.createElement('link');
-    css.rel = 'stylesheet';
-    css.href = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.css';
-    document.head.appendChild(css);
-
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js';
-    script.onload = () => initialize();
-    document.body.appendChild(script);
+    // Initialize the map directly since Leaflet is now properly imported
+    initialize();
 
     return () => {
       // cleanup leaflet elements if any
       if (mapRef.current && mapRef.current.remove) {
         mapRef.current.remove();
       }
-      document.head.removeChild(css);
-      document.body.removeChild(script);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -49,12 +39,9 @@ function Heatmap() {
     const heatmapData = await fetchData();
 
     // Create map
-    // eslint-disable-next-line no-undef
-    const L = window.L;
     mapRef.current = L.map('map').setView([20, 0], 2);
 
     // Add dark tiles (CartoDB Dark Matter)
-    // eslint-disable-next-line no-undef
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
       maxZoom: 19
@@ -65,8 +52,7 @@ function Heatmap() {
   }
 
   function addMarkers(points) {
-    const L = window.L;
-    if (!L || !mapRef.current) return;
+    if (!mapRef.current) return;
 
     points.forEach(point => {
       const color = point.value > 100 ? 'red' :
@@ -115,7 +101,6 @@ function Heatmap() {
     if (searchMarkerRef.current) {
       searchMarkerRef.current.remove();
     }
-    const L = window.L;
     searchMarkerRef.current = L.marker([lat, lng]).addTo(mapRef.current).bindPopup(`<b>Search Location</b><br/>Lat: ${lat}<br/>Lng: ${lng}`).openPopup();
   }
 
@@ -134,7 +119,6 @@ function Heatmap() {
 
     if (nearest) {
       mapRef.current.setView([nearest.lat, nearest.lng], 12);
-      const L = window.L;
       L.popup()
         .setLatLng([nearest.lat, nearest.lng])
         .setContent(`<b>Nearest Device</b><br/>Device: ${nearest.device_id}<br/>Noise: ${nearest.value.toFixed(1)} dB<br/>Distance: ${(minDistance * 111).toFixed(2)} km`)
@@ -159,36 +143,286 @@ function Heatmap() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1 style={{ color: '#fff' }}>Device Noise Level Heatmap</h1>
+    <div style={{ 
+      padding: 20, 
+      backgroundColor: '#0a0a0a', 
+      minHeight: '100vh',
+      color: '#e6eef8'
+    }}>
+      <h1 style={{ 
+        color: '#fff', 
+        marginBottom: 20,
+        textAlign: 'center',
+        fontSize: '2rem',
+        fontWeight: '600'
+      }}>Device Noise Level Heatmap</h1>
 
-      <div style={{ marginBottom: 10 }} className="search-container">
-        <strong>Search Location:</strong>
-        <input ref={searchLatRef} type="number" placeholder="Latitude" step="any" min="-90" max="90" style={{ width: 200, padding: 5, margin: '0 5px' }} />
-        <input ref={searchLngRef} type="number" placeholder="Longitude" step="any" min="-180" max="180" style={{ width: 200, padding: 5, margin: '0 5px' }} />
-        <button onClick={searchLocation} style={{ padding: '5px 10px', marginRight: 6 }}>Go to Location</button>
-        <button onClick={findNearestDevice} style={{ padding: '5px 10px' }}>Find Nearest Device</button>
-        <span id="searchError" style={{ color: 'red', fontSize: 12, marginLeft: 8 }}></span>
+      <div style={{ 
+        marginBottom: 15,
+        padding: 15,
+        backgroundColor: '#1a1a1a',
+        borderRadius: 8,
+        border: '1px solid #333',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
+      }} className="search-container">
+        <strong style={{ color: '#e6eef8', marginRight: 10 }}>Search Location:</strong>
+        <input 
+          ref={searchLatRef} 
+          type="number" 
+          placeholder="Latitude" 
+          step="any" 
+          min="-90" 
+          max="90" 
+          style={{ 
+            width: 200, 
+            padding: 8, 
+            margin: '0 5px',
+            backgroundColor: '#2a2a2a',
+            border: '1px solid #444',
+            borderRadius: 4,
+            color: '#fff',
+            fontSize: '14px'
+          }} 
+        />
+        <input 
+          ref={searchLngRef} 
+          type="number" 
+          placeholder="Longitude" 
+          step="any" 
+          min="-180" 
+          max="180" 
+          style={{ 
+            width: 200, 
+            padding: 8, 
+            margin: '0 5px',
+            backgroundColor: '#2a2a2a',
+            border: '1px solid #444',
+            borderRadius: 4,
+            color: '#fff',
+            fontSize: '14px'
+          }} 
+        />
+        <button 
+          onClick={searchLocation} 
+          style={{ 
+            padding: '8px 15px', 
+            marginRight: 8,
+            backgroundColor: '#4c7ae0',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 4,
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseOver={(e) => e.target.style.backgroundColor = '#5a8bef'}
+          onMouseOut={(e) => e.target.style.backgroundColor = '#4c7ae0'}
+        >Go to Location</button>
+        <button 
+          onClick={findNearestDevice} 
+          style={{ 
+            padding: '8px 15px',
+            backgroundColor: '#22c55e',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 4,
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '500',
+            transition: 'background-color 0.2s'
+          }}
+          onMouseOver={(e) => e.target.style.backgroundColor = '#16a34a'}
+          onMouseOut={(e) => e.target.style.backgroundColor = '#22c55e'}
+        >Find Nearest Device</button>
+        <span id="searchError" style={{ color: '#ef4444', fontSize: 12, marginLeft: 8 }}></span>
       </div>
 
-      <div className="legend" style={{ background: '#0b1220', color: '#e6eef8', padding: 10, borderRadius: 6, boxShadow: '0 6px 20px rgba(0,0,0,0.6)', marginBottom: 10 }}>
-        <strong>Decibel Levels:</strong>
-        <span style={{ color: '#7dd3fc', marginLeft: 8 }}>30-50 dB (Quiet)</span> | <span style={{ color: '#34d399' }}>50-70 dB (Moderate)</span> | <span style={{ color: '#fbbf24' }}>70-85 dB (Loud)</span> | <span style={{ color: '#fb923c' }}>85-100 dB (Very Loud)</span> | <span style={{ color: '#f87171' }}>100+ dB (Noise Pollution)</span>
-        <br />
-        <strong>Data Sources:</strong>
-        <span style={{ background: 'rgba(125,211,252,0.12)', padding: '2px 6px', marginLeft: 6, borderRadius: 3 }}>Generated Data</span> |
-        <span style={{ background: 'rgba(248,113,113,0.12)', padding: '2px 6px', marginLeft: 6, borderRadius: 3 }}>Submitted Data</span>
-        <br />
-        <button onClick={refreshData} style={{ padding: '5px 10px', marginTop: 6 }}>Refresh Data</button>
-        <span id="dataCount" style={{ marginLeft: 8 }}>Total: {data.length} points ({submittedCount} submitted)</span>
+      <div className="legend" style={{ 
+        background: '#1a1a1a', 
+        color: '#e6eef8', 
+        padding: 15, 
+        borderRadius: 8, 
+        boxShadow: '0 6px 20px rgba(0,0,0,0.8)', 
+        marginBottom: 15,
+        border: '1px solid #333',
+        lineHeight: 1.6
+      }}>
+        <div style={{ marginBottom: 10 }}>
+          <strong style={{ fontSize: '16px', color: '#fff' }}>Decibel Levels:</strong>
+          <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+            <span style={{ 
+              color: '#7dd3fc', 
+              background: 'rgba(125,211,252,0.15)', 
+              padding: '4px 8px', 
+              borderRadius: 4,
+              fontSize: '14px'
+            }}>30-50 dB (Quiet)</span>
+            <span style={{ 
+              color: '#34d399', 
+              background: 'rgba(52,211,153,0.15)', 
+              padding: '4px 8px', 
+              borderRadius: 4,
+              fontSize: '14px'
+            }}>50-70 dB (Moderate)</span>
+            <span style={{ 
+              color: '#fbbf24', 
+              background: 'rgba(251,191,36,0.15)', 
+              padding: '4px 8px', 
+              borderRadius: 4,
+              fontSize: '14px'
+            }}>70-85 dB (Loud)</span>
+            <span style={{ 
+              color: '#fb923c', 
+              background: 'rgba(251,146,60,0.15)', 
+              padding: '4px 8px', 
+              borderRadius: 4,
+              fontSize: '14px'
+            }}>85-100 dB (Very Loud)</span>
+            <span style={{ 
+              color: '#f87171', 
+              background: 'rgba(248,113,113,0.15)', 
+              padding: '4px 8px', 
+              borderRadius: 4,
+              fontSize: '14px'
+            }}>100+ dB (Noise Pollution)</span>
+          </div>
+        </div>
+        
+        <div style={{ marginBottom: 10 }}>
+          <strong style={{ fontSize: '16px', color: '#fff' }}>Data Sources:</strong>
+          <div style={{ marginTop: 8, display: 'flex', gap: 10 }}>
+            <span style={{ 
+              background: 'rgba(125,211,252,0.15)', 
+              color: '#7dd3fc',
+              padding: '4px 10px', 
+              borderRadius: 4,
+              fontSize: '14px',
+              border: '1px solid rgba(125,211,252,0.3)'
+            }}>Generated Data</span>
+            <span style={{ 
+              background: 'rgba(248,113,113,0.15)', 
+              color: '#f87171',
+              padding: '4px 10px', 
+              borderRadius: 4,
+              fontSize: '14px',
+              border: '1px solid rgba(248,113,113,0.3)'
+            }}>Submitted Data</span>
+          </div>
+        </div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+          <button 
+            onClick={refreshData} 
+            style={{ 
+              padding: '8px 15px', 
+              backgroundColor: '#6366f1',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#4f46e5'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#6366f1'}
+          >🔄 Refresh Data</button>
+          <span id="dataCount" style={{ 
+            fontSize: '14px',
+            color: '#94a3b8',
+            background: 'rgba(148,163,184,0.1)',
+            padding: '6px 12px',
+            borderRadius: 4
+          }}>
+            Total: {data.length} points ({submittedCount} submitted)
+          </span>
+        </div>
       </div>
 
-      <div id="map" style={{ height: 600, width: '100%', borderRadius: 6, overflow: 'hidden', boxShadow: '0 8px 30px rgba(2,6,23,0.6)' }}></div>
-      {/* Dark popup styling for Leaflet popups */}
+      <div id="map" style={{ 
+        height: 600, 
+        width: '100%', 
+        borderRadius: 8, 
+        overflow: 'hidden', 
+        boxShadow: '0 10px 40px rgba(0,0,0,0.8)',
+        border: '1px solid #333'
+      }}></div>
+      
+      {/* Enhanced Dark theme styling for Leaflet and UI elements */}
       <style>{`
-        .leaflet-popup-content-wrapper { background: #0b1220; color: #e6eef8; border-radius: 6px; box-shadow: 0 6px 18px rgba(0,0,0,0.6); }
-        .leaflet-popup-content { margin: 8px 12px; }
-        .leaflet-popup-tip { background: #0b1220; }
+        /* Leaflet popup dark theme */
+        .leaflet-popup-content-wrapper { 
+          background: #1a1a1a; 
+          color: #e6eef8; 
+          border-radius: 8px; 
+          box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+          border: 1px solid #333;
+        }
+        .leaflet-popup-content { 
+          margin: 12px 16px;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+        .leaflet-popup-tip { 
+          background: #1a1a1a;
+          border: 1px solid #333;
+        }
+        .leaflet-popup-close-button {
+          color: #94a3b8 !important;
+          font-size: 18px !important;
+          padding: 4px 8px !important;
+        }
+        .leaflet-popup-close-button:hover {
+          color: #fff !important;
+          background: rgba(255,255,255,0.1) !important;
+        }
+        
+        /* Leaflet control buttons dark theme */
+        .leaflet-control-zoom a {
+          background-color: #1a1a1a !important;
+          color: #e6eef8 !important;
+          border: 1px solid #333 !important;
+        }
+        .leaflet-control-zoom a:hover {
+          background-color: #2a2a2a !important;
+          color: #fff !important;
+        }
+        .leaflet-control-attribution {
+          background-color: rgba(26,26,26,0.9) !important;
+          color: #94a3b8 !important;
+          border: 1px solid #333 !important;
+        }
+        .leaflet-control-attribution a {
+          color: #7dd3fc !important;
+        }
+        
+        /* Input focus styles for dark theme */
+        input[type="number"]:focus {
+          outline: none !important;
+          border-color: #4c7ae0 !important;
+          box-shadow: 0 0 0 2px rgba(76,122,224,0.2) !important;
+        }
+        
+        /* Button hover effects */
+        button {
+          transition: all 0.2s ease-in-out !important;
+        }
+        
+        /* Scrollbar styling for dark theme */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #1a1a1a;
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #444;
+          border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #666;
+        }
       `}</style>
     </div>
   );
