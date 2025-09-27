@@ -14,6 +14,12 @@ function Navbar() {
       {/* Right side: Navigation Links */}
       <div className="flex items-center gap-6">
         <Link 
+          to="/heatmap" 
+          className="bg-transparent cursor-pointer text-white font-semibold py-2 px-6 rounded-full border border-white/20 hover:bg-white/10 transition-colors"
+        >
+          Heatmap
+        </Link>
+        <Link 
           to="/dashboard" 
           className="bg-white cursor-pointer text-black font-semibold py-2 px-6 rounded-full border border-white/20 hover:bg-gray-200 transition-colors"
         >
