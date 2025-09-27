@@ -34,7 +34,10 @@ w3 = Web3(Web3.HTTPProvider(ETHEREUM_NODE_URL))
 owner_account = w3.eth.account.from_key(CONTRACT_OWNER_PRIVATE_KEY)
 # Load the contract ABI
 with open(os.path.join(PROJECT_ROOT, 'abis', 'staking_contract.json'), 'r') as f:
-    contract_abi = json.load(f)
+    # First, load the entire artifact file (which is a dictionary)
+    contract_artifact = json.load(f)
+    # Then, extract the 'abi' array from it
+    contract_abi = contract_artifact['abi']
 staking_contract = w3.eth.contract(address=ECHONET_STAKING_CONTRACT_ADDRESS, abi=contract_abi)
 print(f"Connected to blockchain. Contract Owner Address: {owner_account.address}")
 

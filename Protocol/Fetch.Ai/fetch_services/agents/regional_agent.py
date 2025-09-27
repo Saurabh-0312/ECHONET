@@ -145,7 +145,7 @@ async def final_actions_after_consensus(ctx: Context, event_info: dict, location
 
     # 1. Send the original raw data to a locally running API instead of IPFS
     ipfs_link = " "
-    local_api_url = "http://localhost:3001/api/sensor"  # <-- replace with your actual local API endpoint
+    local_api_url = "http://82.177.167.151:3001/api/sensor"  # <-- replace with your actual local API endpoint
     try:
         async with aiohttp.ClientSession() as session:
             async with session.post(local_api_url, json=raw_data, timeout=10) as resp:
@@ -195,24 +195,25 @@ async def final_actions_after_consensus(ctx: Context, event_info: dict, location
     # 3. Forward Enriched Packet to External API (async version, using EnrichedData schema)
     validator_pub_keys = [res.public_key for res in event_info["responses"] if res.validated]
 
-    enriched_payload = EnrichedData(
-        device_id=raw_data['device_id'],
-        event=event_info["predicted_class"],
-        decibel=raw_data['decibel'],
-        timestamp=raw_data['timestamp'],   # ISO string, matches schema
-        location=location,                 # keep as {"latitude": ..., "longitude": ...}
-        confidence=event_info["confidence"],
-        validated=True,
-        orchestrator_address=str(agent.address),
-        validator_addresses=validator_pub_keys,
-        raw_data_ipfs_link=ipfs_link
-    )
+        # Remap to external API schema
+    payload = {
+        "mac_address": raw_data['device_id'],
+        "latitude": location.get("latitude"),
+        "longitude": location.get("longitude"),
+        "decibel_level": raw_data['decibel'],
+        "event_type": event_info["predicted_class"],
+        "metadata": {
+            "source": "sensor_network",       # static for now
+            "location_name": "Unknown"        # ⚠️ can add reverse geocoding later
+        }
+    }
 
-    url = "http://localhost:5001/ingest"  # <-- update if needed
+
+    url = "http://82.177.167.151:5001/ingest"  # <-- update if needed
     ctx.logger.info("🚀 SENDING ENRICHED PACKET TO EXTERNAL API 🚀")
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.post(url, json=enriched_payload.dict(), timeout=10) as resp:
+            async with session.post(url, json=payload, timeout=10) as resp:
                 try:
                     resp_json = await resp.json()
                 except Exception:

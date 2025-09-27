@@ -18,6 +18,7 @@ from config.settings import GITHUB_PAT, KNOWLEDGE_GRAPH_GIST_ID
 
 # Import the schema for the incoming message
 from fetch_services.agents.schemas import FactCandidate
+from config.settings import AGENTVERSE_API_KEY
 
 # --- Agent Definition ---
 NOTARY_SEED = "notary_agent_super_secret_seed_phrase_for_echonet"
@@ -25,8 +26,7 @@ agent = Agent(
     name="EchoNetNotary",
     seed=NOTARY_SEED,
     # The port/endpoint are for local testing; on Agentverse, it will use its mailbox.
-    port=8001,
-    endpoint=["http://127.0.0.1:8001/submit"],
+    mailbox=f"{AGENTVERSE_API_KEY}@agentverse.ai"
 )
 
 # --- State and Gist Helpers ---
