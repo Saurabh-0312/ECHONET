@@ -29,6 +29,8 @@ export const CidProvider = ({ children }) => {
         if (ipfsCID) {
           try {
             // Call the backend's new API for sensor data
+            console.log('Fetching sensor data for CID:', ipfsCID);
+            
             const sensorRes = await axios.get(`${backendUrl}/api/sensor/${ipfsCID}`);
             setSensorData(sensorRes.data);
             console.log('Sensor API data:', sensorRes.data);

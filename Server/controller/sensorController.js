@@ -39,7 +39,7 @@ async function notifySmartContract(pieceCid, deviceId) {
         // console.log()
         // console.log(`[CONTRACT] Submitting reading to contract for device: ${deviceId}`);
         
-        const tx = await contract.submitReading("AA:BB:CC:DD:EE:03",formattedPieceId);
+        const tx = await contract.submitReading(deviceId,formattedPieceId);
         
         // console.log(`[CONTRACT] Transaction sent. Waiting for confirmation... Tx hash: ${tx.hash}`);
         await tx.wait(); // Wait for the transaction to be mined

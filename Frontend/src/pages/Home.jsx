@@ -4,7 +4,7 @@ import { Routes, Route } from 'react-router-dom'
 import Navbar from '../components/landingPage/navbar/Navbar.jsx'
 import LandingPage from '../components/landingPage/LandingPage.jsx'
 import DescriptionSection from '../components/landingPage/Details.jsx'
-// import DevTeam from '../components/landingPage/DevTeam.jsx'
+import DevTeam from '../components/landingPage/DevTeam.jsx'
 
 function Home() {
   const descRef = useRef(null)
@@ -38,7 +38,7 @@ function Home() {
       {/* Attach ref to a wrapper around the description so we can observe it */}
       <div ref={descRef}>
         <DescriptionSection />
-        {/* <DevTeam /> */}
+        <DevTeam />
       </div>
     </div>
   )
