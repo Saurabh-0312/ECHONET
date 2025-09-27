@@ -50,9 +50,8 @@ jobs:
             cd ECHONET &&
             git fetch origin &&
             git reset --hard origin/main &&
-            sudo docker compose down &&
             sudo docker compose up --build -d --force-recreate
           '
 
       - name: Verify deployment
-        run: ssh ubuntu@82.177.167.151 'sudo docker compose ps'
+        run: ssh ubuntu@82.177.167.151 'sudo docker-compose ps'
