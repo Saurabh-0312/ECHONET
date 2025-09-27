@@ -1,0 +1,46 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Frontend/**'
+      - 'Server/**'  # Assuming Server is your Backend
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/cloud_rsa
+          chmod 600 ~/.ssh/cloud_rsa
+          ssh-keyscan -H 82.177.167.151 >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        run: |
+          ssh -i ~/.ssh/cloud_rsa ubuntu@82.177.167.151 '
+            cd ECHONET &&
+            git fetch origin &&
+            git reset --hard origin/main &&
+            sudo docker compose down &&
+            sudo docker compose up --build -d --force-recreate
+          '
+
+      - name: Verify deployment
+        run: |
+          ssh -i ~/.ssh/cloud_rsa ubuntu@82.177.167.151 '
+            sudo docker compose ps
+          '
+
+      - name: Cleanup SSH key
+        if: always()
+        run: |
+          rm -f ~/.ssh/cloud_rsa
