@@ -23,10 +23,14 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 -d > ~/.ssh/cloud_rsa
           chmod 600 ~/.ssh/cloud_rsa
           ssh-keyscan -H 82.177.167.151 >> ~/.ssh/known_hosts
+          # show fingerprint of the provided key to help debugging (not secret)
+          ssh-keygen -lf ~/.ssh/cloud_rsa || true
 
       - name: Deploy to server
         run: |
-          ssh -i ~/.ssh/cloud_rsa ubuntu@82.177.167.151 '
+          # use IdentitiesOnly to force ssh to use the provided key (avoids agent/conflicts)
+          ssh -i ~/.ssh/cloud_rsa -o IdentitiesOnly=yes ubuntu@82.177.167.151 '
+            set -e
             cd ECHONET &&
             git fetch origin &&
             git reset --hard origin/main &&
@@ -36,7 +40,7 @@ jobs:
 
       - name: Verify deployment
         run: |
-          ssh -i ~/.ssh/cloud_rsa ubuntu@82.177.167.151 '
+          ssh -i ~/.ssh/cloud_rsa -o IdentitiesOnly=yes ubuntu@82.177.167.151 '
             sudo docker compose ps
           '
 
