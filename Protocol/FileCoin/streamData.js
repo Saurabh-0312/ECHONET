@@ -4,8 +4,7 @@ const BACKEND_URL = "http://localhost:3001/api/sensor";
 
 // Simulated device MAC addresses
 const devices = [
-  "00:1A:2B:3C:4D:5E"
-
+  "02c:cf:67:c5:6b:63"
 ];
 
 // Function to send random sensor data

@@ -18,6 +18,8 @@ async function notifySmartContract(pieceCid, deviceId) {
         const CONTRACT_ADDRESS = process.env.MAIN_CONTRACT_ADDRESS;
         const CONTRACT_ABI = RegisterABI.output.abi;
 
+        console.log(`[CONTRACT] Notifying contract at ${CONTRACT_ADDRESS} for device ${deviceId} with PieceCID ${pieceCid}...`);
+
         // 1. Connect to the blockchain network using the RPC URL
         const provider = new ethers.JsonRpcProvider(RPC_URL);
 
@@ -76,7 +78,7 @@ async function processQueue() {
 
         const batch = [...buffers[deviceId]];
         const encoded = new TextEncoder().encode(JSON.stringify(batch));
-        // console.log(`📤 Uploading batch for ${deviceId} with ${batch.length} records...`);
+        console.log(`📤 Uploading batch for ${deviceId} with ${batch.length} records...`);
 
         const uploadResult = await synapse.storage.upload(encoded, {
             maxFee: "1000000000000000000", // 1 FIL
@@ -144,7 +146,7 @@ export const getSensorData = async (req, res) => {
     try {
         const { cid } = req.params;
         if (!cid) return res.status(400).json({ error: "PieceCID is required" });
-        // console.log(`📥 Retrieving data for PieceCID: ${cid}...`);
+        console.log(`📥 Retrieving data for PieceCID: ${cid}...`);
         const retrieved = await synapse.storage.download(cid);
         // console.log("✅ Data retrieved successfully.");
         

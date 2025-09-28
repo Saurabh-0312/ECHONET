@@ -21,7 +21,7 @@ export const useRegisterDevice = () => {
   const [error, setError] = useState(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const BACKEND_URI = import.meta.env.VITE_BACKEND_URI || "http://localhost:3001";
+  const BACKEND_URI = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
   const API_URL = `${BACKEND_URI}/api/hypergraph`;
   // const API_URL = `http://localhost:3001/api/hypergraph`;
 
@@ -57,7 +57,7 @@ export const useRegisterDevice = () => {
       };
 
       const tiwariData = {
-        max_address : deviceId,
+        mac_address : deviceId,
         area : locality,
         sector_no : sectorNo,
         city : deviceLocation,
@@ -66,7 +66,6 @@ export const useRegisterDevice = () => {
       }
 
       console.log("Mapped Data:", mappedData);
-      
 
       try {
         // 1️⃣ Validate Inputs
@@ -86,10 +85,9 @@ export const useRegisterDevice = () => {
           throw new Error("MetaMask not detected. Please install MetaMask.");
         }
 
-        console.log("Registering device data:", mappedData);
+        console.log("Registering device data:", tiwariData);
 
-        await axios.post(API_URL, mappedData);
-        await axios.post("https://fetch-dev.onrender.com/register",tiwariData);
+        // await axios.post("https://fetch-dev.onrender.com/register",tiwariData);
 
         // 2️⃣ Setup Provider & Signer
         const provider = new ethers.BrowserProvider(window.ethereum);
@@ -145,6 +143,7 @@ export const useRegisterDevice = () => {
         console.log("Transaction hash:", tx.hash);
 
         const receipt = await tx.wait();
+        await axios.post(API_URL, mappedData);
         console.log("Device registered successfully ✅", receipt);
 
         setIsSuccess(true);

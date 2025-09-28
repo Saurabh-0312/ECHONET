@@ -112,5 +112,24 @@
     "hypergraphEntityId": "a266f027-9d7e-4743-969d-8aac419240e0",
     "hypergraphCID": "ipfs://bafkreieoruecw7wzn3jx66x24exspowqccntbanprcrjwq6wwvukkuhbli",
     "hypergraphEditId": "cab52298-7a17-403d-9008-8166742fcc1d"
+  },
+  {
+    "id": "2c:cf:67:c5:6b:63",
+    "deviceId": "2c:cf:67:c5:6b:63",
+    "name": "2c:cf:67:c5:6b:63",
+    "type": "Sound",
+    "location": "Delhi",
+    "locality": "Yashbhumi",
+    "latitude": "23.901",
+    "longitude": "-16.982",
+    "dataType": "DB",
+    "project": "Echonet",
+    "ownerAddress": "0xf30a8d7d876553c43c516c4af5b445dad7b1dde0",
+    "description": "Sensor 2c:cf:67:c5:6b:63 at Delhi",
+    "timestamp": "2025-09-28T04:59:59.458Z",
+    "status": "active",
+    "hypergraphEntityId": "8e0989d9-c919-4f9d-a96f-697ce3171d23",
+    "hypergraphCID": "ipfs://bafkreibovm6qxvdr5ephr24v4fqmfjxrunqdqq2hr6lw5z5kcwz5dwj4dy",
+    "hypergraphEditId": "ca4df31a-233f-434e-8469-89a928be113b"
   }
 ]

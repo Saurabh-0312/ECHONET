@@ -17,6 +17,7 @@ export const ConverterProvider = ({ children }) => {
     const [userEcho, setUserEcho] = useState("0.000");
     const [USDC_Contract, setUSDC_Contract] = useState(null);
     const [Echo_Contract, setEcho_Contract] = useState(null);
+    const [fee,setFees] = useState();
 
     const { walletAddress: USER_ADDRESS } = useAuth();
 

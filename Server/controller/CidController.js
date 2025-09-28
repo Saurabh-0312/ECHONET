@@ -1,7 +1,7 @@
 import { gql, request } from 'graphql-request';
 
 const apiKey = "20182ea32cbdba66ea1592d3a499b4b5";
-const url = "https://api.studio.thegraph.com/query/120234/main-contract/version/latest";
+const url = "https://api.studio.thegraph.com/query/120234/polygon-contract/version/latest";
 const headers = { Authorization: `Bearer ${apiKey}` };
 
 const getCidData = async (req, res) => {
