@@ -1,10 +1,12 @@
 import React, { useState, useContext, createContext, useEffect } from "react";
 import { ethers } from "ethers";
 import ExchangeABI from "../ABI/ExchangeABI.json";
+import ScoreABI from "../ABI/ScoreABI.json";
 import { useAuth } from "./AuthContext";
 
 const EXCHANAGE_USDC_CONTRACT_ADDRESS = import.meta.env.VITE_EXCHANAGE_USDC_CONTRACT_ADDRESS;
 const EXCHANAGE_ECHO_CONTRACT_ADDRESS = import.meta.env.VITE_EXCHANAGE_ECHO_CONTRACT_ADDRESS;
+const SCORE_CONTRACT_ADDRESS = import.meta.env.VITE_SCORE_ADDRESS;
 const ADMIN_ADDRESS = import.meta.env.VITE_ADMIN_ADDRESS;
 const RPC_URL = import.meta.env.VITE_RPC_URL;
 
@@ -17,7 +19,8 @@ export const ConverterProvider = ({ children }) => {
     const [userEcho, setUserEcho] = useState("0.000");
     const [USDC_Contract, setUSDC_Contract] = useState(null);
     const [Echo_Contract, setEcho_Contract] = useState(null);
-    const [fee,setFees] = useState();
+    const [userScore,setUserScore] = useState();
+    const [scoreContract,setScoreContract] = useState(null);
 
     const { walletAddress: USER_ADDRESS } = useAuth();
 
@@ -59,6 +62,20 @@ export const ConverterProvider = ({ children }) => {
         }
     };
 
+    const fetchUserScore = async () => {
+        if(scoreContract && USER_ADDRESS){
+            try{
+                const score = await scoreContract.getContributionScore(USER_ADDRESS);
+                setUserScore(ethers.formatUnits(score,0));
+                console.log("User score fetched:", ethers.formatUnits(score,0));
+                
+            }catch(error){
+                console.error("Error fetching user score:", error);
+                setUserScore("0");
+            }
+        }
+    };
+
     useEffect(() => {
         const setupContracts = () => {
             try {
@@ -66,13 +83,16 @@ export const ConverterProvider = ({ children }) => {
 
                 console.log("exchange usdc address:", EXCHANAGE_USDC_CONTRACT_ADDRESS);
                 console.log("exchange echo address:", EXCHANAGE_ECHO_CONTRACT_ADDRESS);
+                console.log("exchange score address:", SCORE_CONTRACT_ADDRESS);
                 
-
                 const usdcContractInstance = new ethers.Contract(EXCHANAGE_USDC_CONTRACT_ADDRESS, ExchangeABI.abi, provider);
                 setUSDC_Contract(usdcContractInstance);
 
                 const echoContractInstance = new ethers.Contract(EXCHANAGE_ECHO_CONTRACT_ADDRESS, ExchangeABI.abi, provider);
                 setEcho_Contract(echoContractInstance);
+
+                const scoreContractInstance = new ethers.Contract(SCORE_CONTRACT_ADDRESS, ScoreABI.abi, provider);
+                setScoreContract(scoreContractInstance);
             } catch (error) {
                 console.error("Failed to set up contracts:", error);
             }
@@ -87,6 +107,7 @@ export const ConverterProvider = ({ children }) => {
         if (USDC_Contract && Echo_Contract) {
             fetchUSDCBalances();
             fetchEchoBalances();
+            fetchUserScore();
         }
     }, [USDC_Contract, Echo_Contract]);
 
@@ -95,6 +116,7 @@ export const ConverterProvider = ({ children }) => {
         adminEcho,
         userEcho,
         userUSDC,
+        userScore,
         fetchUSDCBalances,
         fetchEchoBalances,
     };

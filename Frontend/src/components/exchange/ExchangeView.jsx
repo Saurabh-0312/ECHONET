@@ -1,8 +1,6 @@
-import React from 'react';
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useConverter } from '@/context/ConverterContext.jsx';
 import { useTokenSwap } from '../../hooks/UseTokenSwap.jsx';
-// TODO: Replace with your actual wallet/auth context to get the signer
 import { useAuth } from '@/context/AuthContext.jsx'; 
 
 const BackIcon = () => (
@@ -45,12 +43,12 @@ const ContinueArrowIcon = () => (
 );
 
 const ECH_TOKEN = {
-    address: import.meta.env.VITE_EXCHANAGE_ECHO_CONTRACT_ADDRESS,
-    decimals: 18
+  address: import.meta.env.VITE_EXCHANAGE_ECHO_CONTRACT_ADDRESS,
+  decimals: 18
 };
 const USDC_TOKEN = {
-    address: import.meta.env.VITE_EXCHANAGE_USDC_CONTRACT_ADDRESS,
-    decimals: 18
+  address: import.meta.env.VITE_EXCHANAGE_USDC_CONTRACT_ADDRESS,
+  decimals: 18
 };
 
 function ExchangeView() {
@@ -60,16 +58,27 @@ function ExchangeView() {
   const [amountInFromCurrency, setAmountInFromCurrency] = useState(true);
   const [error, setError] = useState('');
 
-  const { adminUSDC, adminEcho, userEcho, userUSDC } = useConverter();
-  
-  // TODO: Replace this with your actual wallet context
-  const { signer } = useAuth(); 
-
+  const { adminUSDC, adminEcho, userEcho, userUSDC, userScore } = useConverter();
+  const { signer } = useAuth();
   const { executeSwap, isSwapping, statusMessage, swapError, swapSuccess } = useTokenSwap(signer);
 
   const numAdminUsdc = parseFloat(adminUSDC);
   const numAdminEcho = parseFloat(adminEcho);
   const echToUsdcRate = numAdminEcho > 0 ? numAdminUsdc / numAdminEcho : 0;
+
+  // --- Tier Fee Logic ---
+  const getFeeTier = () => {
+    if (userScore >= 1000) return { tier: 'Diamond', fee: 500, display: '0.05%' };
+    if (userScore >= 500) return { tier: 'Gold', fee: 1000, display: '0.1%' };
+    if (userScore >= 200) return { tier: 'Silver', fee: 1500, display: '0.15%' };
+    if (userScore >= 50) return { tier: 'Bronze', fee: 2500, display: '0.25%' };
+    return { tier: 'Standard', fee: 3000, display: '0.3%' };
+  };
+  const { tier, fee, display } = getFeeTier();
+
+  // Calculate estimated gas cost (example: base $50 gas * fee %)
+  const estimatedBaseGasUSD = 50; 
+  const estimatedGasCostUSD = ((fee / 10000) * estimatedBaseGasUSD).toFixed(2);
 
   const getBalanceForCurrency = (currency) => {
     return currency === 'ECH' ? userEcho : userUSDC;
@@ -79,9 +88,6 @@ function ExchangeView() {
   const toBalance = getBalanceForCurrency(toCurrency);
 
   let toAmount, fromAmount;
-  console.log("adminUSDC:", adminUSDC );
-  console.log("adminEcho:", adminEcho );
-  
   if (amountInFromCurrency) {
     fromAmount = amount;
     const rate = fromCurrency === 'ECH' ? echToUsdcRate : 1 / echToUsdcRate;
@@ -99,11 +105,11 @@ function ExchangeView() {
       setError('');
     }
   }, [fromAmount, fromBalance]);
-  
+
   useEffect(() => {
-      if(swapSuccess) {
-          setAmount('');
-      }
+    if (swapSuccess) {
+      setAmount('');
+    }
   }, [swapSuccess]);
 
   const handleFromAmountChange = useCallback((e) => {
@@ -136,17 +142,12 @@ function ExchangeView() {
 
   const handleConvert = async () => {
     if (!amount || parseFloat(amount) <= 0 || error) return;
-
     const fromToken = fromCurrency === 'ECH' ? ECH_TOKEN : USDC_TOKEN;
     const toToken = toCurrency === 'USDC' ? USDC_TOKEN : ECH_TOKEN;
-    
-    // await executeSwap(fromToken.address, toToken.address, amount, fromToken.decimals);
-    await executeSwap(amount.toString(),18);
+    await executeSwap(amount.toString(), 18);
   };
 
-  const getCurrencyLogo = (currency) => {
-    return null;
-  }
+  const getCurrencyLogo = (currency) => null;
 
   return (
     <div className="w-full max-w-md mx-auto p-0.5 rounded-3xl bg-gradient-to-br from-lime-400 to-purple-500 animate-fade-in-up">
@@ -224,12 +225,16 @@ function ExchangeView() {
           )}
         </div>
 
+        {/* Dynamic Gas Fee Section */}
         <div className="flex justify-between items-center bg-gray-800/50 rounded-lg p-3 mt-2">
-          <div className="flex items-center space-x-2">
-            <GasIcon />
-            <span className="text-gray-400">Your gas</span>
+          <div className="flex flex-col">
+            <div className="flex items-center space-x-2">
+              <GasIcon />
+              <span className="text-gray-400">Your gas fee</span>
+            </div>
+            <span className="text-xs text-gray-500">Tier: {tier}</span>
           </div>
-          <span className="text-white font-medium">$43.20</span>
+          <span className="text-white font-medium">{display} (~${estimatedGasCostUSD})</span>
         </div>
 
         <div className="mt-8">
@@ -256,8 +261,8 @@ function ExchangeView() {
         </div>
 
         <div className="mt-4 text-sm text-center h-5">
-            {swapError && <p className="text-red-400">{swapError}</p>}
-            {swapSuccess && <p className="text-green-400">Swap successful!</p>}
+          {swapError && <p className="text-red-400">{swapError}</p>}
+          {swapSuccess && <p className="text-green-400">Swap successful!</p>}
         </div>
 
       </div>

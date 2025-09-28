@@ -1,4 +1,5 @@
 import React from 'react'
+import { useAuth } from '@/context/AuthContext';
 
 const WifiIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -23,6 +24,8 @@ const LocationMarkerIcon = () => (
 );
 
 function TopRight() {
+  const {walletAddress} = useAuth();
+
   const deviceData = {
     macAddress: '00:1A:2B:3C:4D:5E',
     installationDate: '2024-09-15',
