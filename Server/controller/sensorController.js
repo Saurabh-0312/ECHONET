@@ -15,7 +15,7 @@ async function notifySmartContract(pieceCid, deviceId) {
     }
 
     try {
-        const CONTRACT_ADDRESS = import.meta.env.VITE_MAIN_CONTRACT_ADDRESS;
+        const CONTRACT_ADDRESS = process.env.MAIN_CONTRACT_ADDRESS;
         const CONTRACT_ABI = RegisterABI.output.abi;
 
         // 1. Connect to the blockchain network using the RPC URL
@@ -37,11 +37,11 @@ async function notifySmartContract(pieceCid, deviceId) {
         // console.log("Piece id",formattedPieceId);
         // console.log(deviceId);
         // console.log()
-        // console.log(`[CONTRACT] Submitting reading to contract for device: ${deviceId}`);
+        console.log(`[CONTRACT] Submitting reading to contract for device: ${deviceId}`);
         
         const tx = await contract.submitReading(deviceId,formattedPieceId);
         
-        // console.log(`[CONTRACT] Transaction sent. Waiting for confirmation... Tx hash: ${tx.hash}`);
+        console.log(`[CONTRACT] Transaction sent. Waiting for confirmation... Tx hash: ${tx.hash}`);
         await tx.wait(); // Wait for the transaction to be mined
         
         console.log(`[CONTRACT] Notified contract successfully.`);

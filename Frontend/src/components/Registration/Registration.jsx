@@ -7,15 +7,16 @@ import { useAuth } from '@/context/AuthContext.jsx';
 import { Navigate, useNavigate } from 'react-router-dom';
 
 function Registration() {
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
+  const [latitude, setLatitude] = useState('23.901');
+  const [longitude, setLongitude] = useState('-16.982');
   const [macAddress, setMacAddress] = useState('');
   const [deviceId, setDeviceId] = useState('');
-  const [deviceType, setDeviceType] = useState('');
-  const [deviceLocation, setDeviceLocation] = useState('');
-  const [locality, setLocality] = useState('');
-  const [dataType, setDataType] = useState('');
-  const [projectName, setProjectName] = useState('');
+  const [deviceType, setDeviceType] = useState('Sound');
+  const [deviceLocation, setDeviceLocation] = useState('Delhi');
+  const [locality, setLocality] = useState('Yashbhumi');
+  const [dataType, setDataType] = useState('DB');
+  const [projectName, setProjectName] = useState('Echonet');
+  const [sectorNo,setSectorNo] = useState('24');
 
   const { registerDevice, isLoading, error, isSuccess } = useRegisterDevice();
   const { setIsRegistered } = useAuth();    
@@ -34,6 +35,7 @@ function Registration() {
       locality,
       dataType,
       projectName,
+      sectorNo
     });
 
     if (result.success) {
@@ -47,6 +49,7 @@ function Registration() {
       setDataType('');
       setProjectName('');
       setIsRegistered(true);
+      setSectorNo('')
       Navigate('/dashboard');
     }
   };
@@ -88,6 +91,14 @@ function Registration() {
                 onChange={(e) => setDeviceLocation(e.target.value)}
                 className="w-full px-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 placeholder="Device Location"
+              />
+              <input
+                type="text"
+                required
+                value={sectorNo}
+                onChange={(e) => setSectorNo(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-800/80 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Sector no"
               />
               <input
                 type="text"

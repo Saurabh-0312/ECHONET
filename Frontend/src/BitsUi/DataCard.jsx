@@ -1,5 +1,12 @@
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect, useMemo, Suspense } from 'react';
 import { gsap } from 'gsap';
+import { Canvas } from '@react-three/fiber';
+import { useGLTF, OrbitControls, Loader } from '@react-three/drei';
+
+const RaspberryPiModel = () => {
+  const gltf = useGLTF('/raspberry_pi/scene.gltf');
+  return <primitive object={gltf.scene} scale={2.5} />;
+};
 
 const DataCard = ({ items, className = '', radius = 300, damping = 0.45, fadeOut = 0.6, ease = 'power3.out' }) => {
   const rootRef = useRef(null);
@@ -12,8 +19,6 @@ const DataCard = ({ items, className = '', radius = 300, damping = 0.45, fadeOut
   const dummyData = [];
 
   const dataToDisplay = items && items.length > 0 ? items : dummyData;
-
-  
 
   const formattedData = useMemo(() => {
     const colors = [
@@ -84,7 +89,7 @@ const DataCard = ({ items, className = '', radius = 300, damping = 0.45, fadeOut
   };
 
   const handleCardClick = url => {
-    if (url && url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
+    // if (url && url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const handleCardMove = e => {
@@ -99,7 +104,7 @@ const DataCard = ({ items, className = '', radius = 300, damping = 0.45, fadeOut
       ref={rootRef}
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
-      className={`relative py-4 w-full h-full flex flex-wrap justify-center items-start gap-3 ${className}`}
+      className={`relative py-10 w-full h-full flex flex-wrap justify-center items-start gap-6 ${className}`}
       style={{
         '--r': `${radius}px`,
         '--x': '50%',
@@ -111,7 +116,7 @@ const DataCard = ({ items, className = '', radius = 300, damping = 0.45, fadeOut
           key={i}
           onMouseMove={handleCardMove}
           onClick={() => handleCardClick(c.url)}
-          className="group relative flex flex-col w-[240px] rounded-[20px] overflow-hidden border-2 border-transparent transition-colors duration-300 cursor-pointer"
+          className="group m-4 relative flex flex-col w-[240px] rounded-[20px] overflow-hidden border-2 border-transparent transition-colors duration-300 cursor-pointer"
           style={{
             '--card-border': c.borderColor,
             background: c.gradient,
@@ -127,16 +132,14 @@ const DataCard = ({ items, className = '', radius = 300, damping = 0.45, fadeOut
           />
           <div className="h-[180px] bg-black flex items-center justify-center">
             {/* 3D model viewer: uses the public/raspberry_pi/scene.gltf asset */}
-            <model-viewer
-              src="/raspberry_pi/scene.gltf"
-              alt="Raspberry Pi model"
-              ar
-              environment-image="neutral"
-              auto-rotate
-              camera-controls
-              ios-src="/raspberry_pi/scene.gltf"
-              style={{ width: '100%', height: '100%' }}
-            />
+            <Suspense fallback={<div className="text-white text-center">Loading 3D Model...</div>}>
+              <Canvas style={{ width: '100%', height: '100%' }}>
+                <ambientLight intensity={0.7} />
+                <directionalLight position={[2, 2, 2]} intensity={0.7} />
+                <RaspberryPiModel />
+                <OrbitControls enablePan={false} />
+              </Canvas>
+            </Suspense>
           </div>
           <footer className="relative z-10 p-4 text-white font-sans flex flex-col items-center text-center w-full gap-1">
             <h2 className="m-0 text-xl font-bold">{c.name}.eth</h2>
@@ -172,6 +175,7 @@ const DataCard = ({ items, className = '', radius = 300, damping = 0.45, fadeOut
           opacity: 1
         }}
       />
+      <Loader /> {/* Optional: shows a loading bar for 3D assets */}
     </div>
   );
 };

@@ -141,7 +141,7 @@ function ExchangeView() {
     const toToken = toCurrency === 'USDC' ? USDC_TOKEN : ECH_TOKEN;
     
     // await executeSwap(fromToken.address, toToken.address, amount, fromToken.decimals);
-    await executeSwap();
+    await executeSwap(amount.toString(),18);
   };
 
   const getCurrencyLogo = (currency) => {
@@ -181,7 +181,7 @@ function ExchangeView() {
               />
             </div>
             <div className="text-left">
-              <span className="text-gray-400 text-sm">Balance: {fromBalance} {fromCurrency}</span>
+              <span className="text-gray-400 text-sm">Balance: {toBalance} {fromCurrency}</span>
             </div>
             {error && <p className="text-red-500 text-xs text-left mt-1">{error}</p>}
           </div>
@@ -211,7 +211,7 @@ function ExchangeView() {
               />
             </div>
             <div className="text-left">
-              <span className="text-gray-400 text-sm">Balance: {toBalance} {toCurrency}</span>
+              <span className="text-gray-400 text-sm">Balance: {fromBalance} {toCurrency}</span>
             </div>
           </div>
         </div>

@@ -4,13 +4,61 @@ import DataList from "../components/marketplace/DataList.jsx";
 import { ChevronDown } from "lucide-react";
 
 const Market = () => {
-  const [selectedMarketplace, setSelectedMarketplace] = useState("devices");
+  const [selectedMarketplace, setSelectedMarketplace] = useState("data");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [loadingId, setLoadingId] = useState(null);
 
   const marketplaceOptions = [
     { value: "devices", label: "Devices" },
     { value: "data", label: "Data Streams" },
   ];
+
+  const handleBuyData = async (dataPoint) => {
+    setLoadingId(dataPoint.id);
+    console.log("Device id :", dataPoint.deviceId);
+    console.log("Owner Address :", dataPoint.owner);
+    
+    let success = false;
+    let attempts = 0;
+
+    while (!success && attempts < 30) {
+      try {
+        const response = await fetch("http://82.177.167.151:5002/market/purchase", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            deviceId: dataPoint.deviceId,
+            ownerAddress: dataPoint.owner,
+            priceAmount: "0.01" // you can make this dynamic too
+          }),
+        });
+
+        if (!response.ok) throw new Error("API call failed");
+
+        const result = await response.json();
+        console.log("Purchase API Response:", result);
+
+        if (result.success) {
+          alert(`Purchase successful: ${JSON.stringify(result)}`);
+          success = true;
+        } else {
+          attempts++;
+          await new Promise(res => setTimeout(res, 2000));
+        }
+      } catch (error) {
+        console.error("Purchase API Error:", error);
+        attempts++;
+        await new Promise(res => setTimeout(res, 2000));
+      }
+    }
+
+    if (!success) {
+      alert("Purchase failed after multiple attempts.");
+    }
+
+    setLoadingId(null);
+  };
+
 
   return (
     <div className="bg-black min-h-screen">
@@ -32,9 +80,8 @@ const Market = () => {
               {marketplaceOptions.map((option) => (
                 <button
                   key={option.value}
-                  className={`w-full text-left px-5 py-3 text-white hover:bg-neutral-700 transition-colors ${
-                    selectedMarketplace === option.value ? "bg-neutral-800" : ""
-                  }`}
+                  className={`w-full text-left px-5 py-3 text-white hover:bg-neutral-700 transition-colors ${selectedMarketplace === option.value ? "bg-neutral-800" : ""
+                    }`}
                   onClick={() => {
                     setSelectedMarketplace(option.value);
                     setIsDropdownOpen(false);
@@ -50,7 +97,7 @@ const Market = () => {
         {/* Marketplace Content */}
         <div className="bg-neutral-950 p-6 sm:p-10 rounded-2xl shadow-xl border border-gray-700">
           {selectedMarketplace === "devices" && <DeviceList />}
-          {selectedMarketplace === "data" && <DataList />}
+          {selectedMarketplace === "data" && <DataList handleBuyData={handleBuyData} loadingId={loadingId} />}
         </div>
       </div>
     </div>

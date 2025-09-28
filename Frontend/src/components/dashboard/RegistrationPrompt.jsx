@@ -11,7 +11,7 @@ const RegistrationPrompt = () => {
     };
 
     return (
-        <div className="w-full max-w-3xl mx-auto text-center animate-fade-in">
+        <div className="w-full max-w-3xl mx-auto text-center animate-fade-in pt-20">
             <div className="bg-white/5 border border-white/10 rounded-xl p-10 backdrop-blur-md">
                 <ShieldAlert size={48} className="text-yellow-400 mx-auto mb-6" />
                 <h1 className="text-4xl font-bold text-white mb-4">Registration Required</h1>

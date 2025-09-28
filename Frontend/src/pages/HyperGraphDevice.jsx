@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import Header from "../components/hyperGraph/Header.jsx";
 import Stats from "../components/hyperGraph/Stats";
 import Discovery from "../components/hyperGraph/Discovery";
 import LiveFeed from "../components/hyperGraph/LiveFeed";
 import SuccessModal from "../components/hyperGraph/SuccessModal";
 
-const API_URL = "http://localhost:3001/api/hypergraph";
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 function App() {
   const [stats, setStats] = useState({ totalSensors: 0, totalProjects: 0, activeLocations: 0 });
@@ -17,7 +16,7 @@ function App() {
 
   const fetchSensors = useCallback(async () => {
     try {
-      const response = await axios.get(API_URL);
+      const response = await axios.get(API_URL+'/api/hypergraph');
       if (response.data.success) {
         const sensors = response.data.sensors;
         setStats({
@@ -61,19 +60,23 @@ function App() {
   };
 
   return (
-    <div className="w-full  flex flex-col items-center justify-center overflow-y-auto">
-      <div className=" w-[90%] md:w-[85%] lg:w-[80%] max-w-7xl flex flex-col items-center justify-center min-h-screen text-white transition-all overflow-auto pt-20">
-        <main className="container mx-auto px-6 py-10">
-          <Stats stats={stats} />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+    <div className="w-full flex flex-col items-center justify-center overflow-y-auto">
+      <div className="w-[90%] md:w-[85%] lg:w-[80%] max-w-7xl min-h-screen pt-20">
+        <main className="container mx-auto px-4 py-10 space-y-10">
+          {/* Grid Section */}
+          <div className="grid grid-cols-1 gap-10">
+            <Stats stats={stats} />
             <Discovery onSearch={handleSearch} results={discoveryResults} onDelete={handleDelete} />
+            <LiveFeed sensors={liveFeedSensors} onDelete={handleDelete} />
           </div>
-          <LiveFeed sensors={liveFeedSensors} onDelete={handleDelete} />
         </main>
-        <SuccessModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} message={modalMessage} />
+        <SuccessModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          message={modalMessage}
+        />
       </div>
     </div>
-
   );
 }
 

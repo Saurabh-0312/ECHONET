@@ -12,6 +12,8 @@
   "dependencies": {
     "@graphprotocol/grc-20": "^0.25.2",
     "@radix-ui/react-slot": "^1.2.3",
+    "@react-three/drei": "^10.7.6",
+    "@react-three/fiber": "^9.3.0",
     "@rolldown/pluginutils": "^1.0.0-beta.40",
     "@tailwindcss/vite": "^4.1.13",
     "axios": "^1.12.2",

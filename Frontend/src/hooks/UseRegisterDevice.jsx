@@ -35,6 +35,7 @@ export const useRegisterDevice = () => {
       deviceType,
       deviceLocation,
       locality,
+      sectorNo,
       dataType,
       projectName}) => {
       setIsLoading(true);
@@ -54,6 +55,15 @@ export const useRegisterDevice = () => {
         ownerAddress: walletAddress,
         description: `Sensor ${macAddress} at ${deviceLocation}`, // or use a description field from your form
       };
+
+      const tiwariData = {
+        max_address : deviceId,
+        area : locality,
+        sector_no : sectorNo,
+        city : deviceLocation,
+        latitude,
+        longitude
+      }
 
       console.log("Mapped Data:", mappedData);
       
@@ -78,7 +88,8 @@ export const useRegisterDevice = () => {
 
         console.log("Registering device data:", mappedData);
 
-        await axios.post(API_URL, mappedData);
+        // await axios.post(API_URL, mappedData);
+        // await axios.post("https://fetch-dev.onrender.com/register",tiwariData);
 
         // 2️⃣ Setup Provider & Signer
         const provider = new ethers.BrowserProvider(window.ethereum);

@@ -61,37 +61,26 @@ const Navbar = () => {
                         <NavLink to="/exchange" className="text-gray-300 hover:text-white transition-all duration-200 px-3 py-2 rounded-lg hover:bg-white/10" style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}>
                             Convert
                         </NavLink>
-                        
+
                         <NavLink to="/about" className="text-gray-300 hover:text-white transition-all duration-200 px-3 py-2 rounded-lg hover:bg-white/10" style={({ isActive }) => (isActive ? activeLinkStyle : undefined)}>
                             About Us
                         </NavLink>
                     </nav>
 
                     <div className="flex items-center gap-4">
-                        {(isRegistered) ? (
-                            <>
-                                {isRegistered && (
-                                    <button
-                                        onClick={unregisterDevice}
-                                        disabled={isLoading}
-                                        className="hidden sm:block bg-red-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {isLoading ? "Unregistering..." : "Unregister"}
-                                    </button>
-                                )}
-                                <div className="hidden md:flex bg-white/90 text-black px-4 py-2 rounded-full text-sm font-bold items-center gap-2">
-                                    <span>{echoCoin ? parseFloat(echoCoin).toFixed(2) : '0.00'}</span>
-                                    <span className="text-gray-600">EC</span>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="hidden md:flex items-center gap-4">
-                                <Link to="/login" className="text-gray-300 hover:text-white transition-colors px-3 py-2">Login</Link>
-                                <Link to="/signup" className="bg-white text-black font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
-                                    Sign Up
-                                </Link>
-                            </div>
+                        {isRegistered && (
+                            <button
+                                onClick={unregisterDevice}
+                                disabled={isLoading}
+                                className="hidden sm:block bg-red-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading ? "Unregistering..." : "Unregister"}
+                            </button>
                         )}
+                        <div className="hidden md:flex bg-white/90 text-black px-4 py-2 rounded-full text-sm font-bold items-center gap-2">
+                            <span>{echoCoin ? parseFloat(echoCoin).toFixed(2) : '0.00'}</span>
+                            <span className="text-gray-600">EC</span>
+                        </div>
                         <div className="md:hidden" ref={mobileMenuRef}>
                             <button className="text-white" onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}>
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -118,7 +107,7 @@ const Navbar = () => {
                         </div>
                     ) : (
                         <div className="flex flex-col items-center gap-4 w-full px-6">
-                             {isRegistered && (
+                            {isRegistered && (
                                 <button
                                     onClick={() => { unregisterDevice(); setMobileMenuOpen(false); }}
                                     disabled={isLoading}

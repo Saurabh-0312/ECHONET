@@ -16,14 +16,14 @@ function DashboardPage() {
     const { isRegistered } = useAuth();
 
     return (
-        <div className="relative h-screen w-screen bg-black text-white flex flex-col overflow-hidden">
+        <div className="relative min-h-screen w-screen bg-black text-white flex flex-col">
             {/* Background Layer */}
             <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
                 <Bg />
             </div>
 
             {/* Foreground Content */}
-            <div className="relative z-10 flex flex-col h-screen  overflow-hidden">
+            <div className="relative z-10 flex flex-col h-screen  overflow-y-auto">
                 <Navbar />
                 <main className="flex-1 flex flex-col items-center justify-center">
                     <div className="w-full mx-auto h-full flex flex-col items-center justify-center">

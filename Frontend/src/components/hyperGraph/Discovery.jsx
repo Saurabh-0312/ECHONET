@@ -17,7 +17,7 @@ function Discovery({ onSearch, results, onDelete }) {
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      className=" border bg-black-900/50 border-white/25   hover:border-white/30 transition-all duration-300 p-6 rounded-2xl shadow-xl backdrop-blur-lg"
+      className="border bg-black-900/50 border-white/25 hover:border-white/30 transition-all duration-300 p-6 rounded-2xl shadow-xl backdrop-blur-lg"
     >
       <div className="flex items-center mb-6">
         <i className="fas fa-search-location text-2xl text-purple-400 mr-3"></i>
@@ -62,7 +62,7 @@ function Discovery({ onSearch, results, onDelete }) {
         ) : results.length === 0 ? (
           <p className="text-gray-400 text-center">No devices found for this query.</p>
         ) : (
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto">
             {results.map((device) => (
               <SensorCard key={device.id} device={device} onDelete={onDelete} isSearchResult={true} />
             ))}

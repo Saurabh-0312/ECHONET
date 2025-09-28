@@ -3,46 +3,90 @@ import decibelData from "../../DummyData/decibelData.json";
 import { BsSoundwave } from "react-icons/bs";
 import { FaUserAstronaut } from "react-icons/fa";
 
-
-const DataCard = ({ dataPoint }) => (
-  <div className="bg-gray-900/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6 transition-all duration-300 group hover:border-teal-500 hover:shadow-2xl hover:shadow-teal-500/20">
+const DataCard = ({ dataPoint, handleBuyData, loading }) => (
+  <div className="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all duration-200">
+    {/* Header */}
     <div className="flex justify-between items-center mb-4">
-      <span className="bg-teal-900 text-teal-300 text-xs font-semibold px-3 py-1 rounded-full">
+      <span className="bg-gray-100 text-gray-800 text-xs font-semibold px-3 py-1 rounded border border-gray-300">
         {dataPoint.deviceId}
       </span>
-      <span className="text-gray-400 text-xs">
+      <span className="text-gray-500 text-xs">
         {new Date(dataPoint.timeline).toLocaleDateString()}
       </span>
     </div>
 
+    {/* Decibel Info */}
     <div className="text-center my-6">
-      <BsSoundwave className="text-teal-400 text-4xl mx-auto mb-3" />
-      <p className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-sky-400">
+      <BsSoundwave className="text-gray-700 text-4xl mx-auto mb-3" />
+      <p className="text-5xl font-bold text-gray-900">
         {dataPoint.data.decibel}
-        <span className="text-2xl text-gray-400 align-text-top"> dB</span>
+        <span className="text-2xl text-gray-500 align-text-top ml-1">dB</span>
       </p>
       <p className="text-sm text-gray-500 mt-1">Decibel Level</p>
     </div>
 
-    <div className="flex items-center gap-3 text-gray-300 border-t border-gray-700 pt-4">
-      <FaUserAstronaut className="text-gray-400 text-lg w-5 text-center" />
-      <p className="font-mono text-xs break-all text-gray-400">{dataPoint.owner}</p>
+    {/* Owner Info */}
+    <div className="flex items-center gap-2 text-gray-700 border-t border-gray-200 pt-4">
+      <FaUserAstronaut className="text-gray-500 text-lg" />
+      <p className="font-mono text-xs break-all text-gray-600">
+        {dataPoint.owner}
+      </p>
     </div>
 
-    <button className="w-full mt-6 bg-gradient-to-r from-teal-600 to-sky-600 text-white font-bold py-3 rounded-xl hover:from-teal-500 hover:to-sky-500 transition-all duration-300 transform hover:scale-105 shadow-lg">
-      Purchase Data
+    {/* Purchase Button */}
+    <button
+      onClick={() => handleBuyData(dataPoint)}
+      className={`w-full mt-6 bg-black text-white font-medium py-2 rounded-md transition-all duration-200 flex items-center justify-center gap-2 ${
+        loading
+          ? "opacity-60 cursor-not-allowed"
+          : "hover:bg-gray-800"
+      }`}
+      disabled={loading}
+    >
+      {loading ? (
+        <>
+          <svg
+            className="animate-spin h-5 w-5 text-white mr-2"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          Processing...
+        </>
+      ) : (
+        "Purchase Data"
+      )}
     </button>
   </div>
 );
 
-const DataList = () => (
-  <div className="w-full">
-    <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-sky-400 mb-10 text-center">
+const DataList = ({ handleBuyData, loadingId }) => (
+  <div className="w-full max-w-6xl mx-auto">
+    <h2 className="text-3xl font-bold text-center text-gray-200 mb-8">
       Data Stream Marketplace
     </h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {decibelData.map((item) => (
-        <DataCard key={item.id} dataPoint={item} />
+        <DataCard
+          key={item.id}
+          dataPoint={item}
+          handleBuyData={handleBuyData}
+          loading={loadingId === item.id}
+        />
       ))}
     </div>
   </div>

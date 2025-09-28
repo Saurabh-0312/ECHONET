@@ -63,6 +63,10 @@ export const ConverterProvider = ({ children }) => {
             try {
                 const provider = new ethers.JsonRpcProvider(RPC_URL);
 
+                console.log("exchange usdc address:", EXCHANAGE_USDC_CONTRACT_ADDRESS);
+                console.log("exchange echo address:", EXCHANAGE_ECHO_CONTRACT_ADDRESS);
+                
+
                 const usdcContractInstance = new ethers.Contract(EXCHANAGE_USDC_CONTRACT_ADDRESS, ExchangeABI.abi, provider);
                 setUSDC_Contract(usdcContractInstance);
 
