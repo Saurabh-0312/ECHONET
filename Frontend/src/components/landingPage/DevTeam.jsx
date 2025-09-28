@@ -8,11 +8,11 @@ import avatarLiam from '../../assets/team/avatar-liam.svg';
 import avatarX from '../../assets/team/avatar-x.svg';
 
 const team = [
-  { name: 'Saurabh', role: 'Full-stack Engineer', twitter: 'saurabh', image: avatarSaurabh },
-  { name: 'Eka', role: 'Blockchain Engineer', twitter: 'eka', image: avatarEka },
-  { name: 'Maya', role: 'Product Designer', twitter: 'maya', image: avatarMaya },
-  { name: 'Liam', role: 'DevOps', twitter: 'liam', image: avatarLiam },
-  { name: 'X', role: 'Contributor', github: 'usernameX', linkedin: 'usernameX', image: avatarX },
+  { name: 'Saurabh Sahu', role: 'Frontend Developer', twitter: 'saurabh', image: avatarSaurabh },
+  { name: 'Ekas Singh Atwal', role: 'Full-Stack Developer', twitter: 'eka', image: avatarEka },
+  { name: 'Saurabh Singh', role: 'Blockchain Developer', twitter: 'maya', image: avatarMaya },
+  { name: 'Shubham Tiwari', role: 'Backend Developer', twitter: 'liam', image: avatarLiam },
+  { name: 'Saurabh Krishna Chauhan', role: 'Backend Developer', github: 'usernameX', linkedin: 'usernameX', image: avatarX },
 ];
 
 function DevTeam() {

@@ -39,7 +39,12 @@ function App() {
 
   const handleSearch = async (location, type) => {
     try {
+      console.log(`Searching for location: ${location}, type: ${type}`);
+      
       const response = await axios.get(`${API_URL}?location=${location}&type=${type}`);
+
+      console.log("Search response:", response.data);
+      
       if (response.data.success) setDiscoveryResults(response.data.sensors);
     } catch (error) {
       alert(`Search failed: ${error.message}`);

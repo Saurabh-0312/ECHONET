@@ -88,8 +88,8 @@ export const useRegisterDevice = () => {
 
         console.log("Registering device data:", mappedData);
 
-        // await axios.post(API_URL, mappedData);
-        // await axios.post("https://fetch-dev.onrender.com/register",tiwariData);
+        await axios.post(API_URL, mappedData);
+        await axios.post("https://fetch-dev.onrender.com/register",tiwariData);
 
         // 2️⃣ Setup Provider & Signer
         const provider = new ethers.BrowserProvider(window.ethereum);
