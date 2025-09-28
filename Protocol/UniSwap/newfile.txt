@@ -83,21 +83,19 @@ contract BasicHook is IHooks {
     }
 
     // --- Core Hook Logic ---
-    // 5-tier score-based dynamic fee system
+    // Dynamic fee system based on contribution scores
     SimplifiedMainContract public immutable basicMainContract;
-
-    // 5-Tier Fee Structure (basis points: 10000 = 100%)
-    uint24 public constant DIAMOND_FEE = 500; // 0.05% - Top tier (score >= 1000)
-    uint24 public constant GOLD_FEE = 1000; // 0.1% - High tier (score >= 500)
-    uint24 public constant SILVER_FEE = 1500; // 0.15% - Mid tier (score >= 200)
-    uint24 public constant BRONZE_FEE = 2500; // 0.25% - Low tier (score >= 50)
-    uint24 public constant STANDARD_FEE = 3000; // 0.3% - Default tier (score < 50)
-
-    // Score thresholds for each tier
-    uint256 public constant DIAMOND_THRESHOLD = 10000;
-    uint256 public constant GOLD_THRESHOLD = 5000;
-    uint256 public constant SILVER_THRESHOLD = 2000;
-    uint256 public constant BRONZE_THRESHOLD = 500;
+    
+    // Fee tiers (in basis points: 10000 = 1%)
+    uint24 public constant VIP_FEE = 500;      // 0.05% for VIP users (score >= 500)
+    uint24 public constant PREMIUM_FEE = 1000; // 0.1% for premium users (score >= 100)
+    uint24 public constant STANDARD_FEE = 3000; // 0.3% for regular users
+    uint24 public constant PENALTY_FEE = 5000;  // 0.5% for low-reputation users (score < 50)
+    
+    // Score thresholds
+    uint256 public constant VIP_THRESHOLD = 500;
+    uint256 public constant PREMIUM_THRESHOLD = 100;
+    uint256 public constant PENALTY_THRESHOLD = 50;
 
     constructor(address _basicMainContractAddress) {
         // Initialize the simplified main contract reference used for contribution scores
@@ -112,42 +110,21 @@ contract BasicHook is IHooks {
     ) external view override returns (bytes4, BeforeSwapDelta, uint24) {
         // Get user's contribution score
         uint256 score = basicMainContract.contributionScores(sender);
-
-        // Determine fee based on 5-tier system
-        uint24 dynamicFee = _calculateTierFee(score);
-
-        return (IHooks.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, dynamicFee);
-    }
-
-    // Calculate fee based on contribution score tier
-    function _calculateTierFee(uint256 score) private pure returns (uint24) {
-        if (score >= DIAMOND_THRESHOLD) {
-            return DIAMOND_FEE; // 0.05% - Diamond tier
-        } else if (score >= GOLD_THRESHOLD) {
-            return GOLD_FEE; // 0.1% - Gold tier
-        } else if (score >= SILVER_THRESHOLD) {
-            return SILVER_FEE; // 0.15% - Silver tier
-        } else if (score >= BRONZE_THRESHOLD) {
-            return BRONZE_FEE; // 0.25% - Bronze tier
+        uint24 dynamicFee;
+        
+        // Determine fee based on contribution score
+        if (score >= VIP_THRESHOLD) {
+            dynamicFee = VIP_FEE;        // 0.05% for VIP users
+        } else if (score >= PREMIUM_THRESHOLD) {
+            dynamicFee = PREMIUM_FEE;    // 0.1% for premium users
+        } else if (score >= PENALTY_THRESHOLD) {
+            dynamicFee = STANDARD_FEE;   // 0.3% for regular users
         } else {
-            return STANDARD_FEE; // 0.3% - Standard tier
+            dynamicFee = PENALTY_FEE;    // 0.5% for low-reputation users
         }
-    }
 
-    // Get user's tier name (for frontend display)
-    function getUserTier(address user) external view returns (string memory) {
-        uint256 score = basicMainContract.contributionScores(user);
-        if (score >= DIAMOND_THRESHOLD) return "DIAMOND";
-        if (score >= GOLD_THRESHOLD) return "GOLD";
-        if (score >= SILVER_THRESHOLD) return "SILVER";
-        if (score >= BRONZE_THRESHOLD) return "BRONZE";
-        return "STANDARD";
-    }
-
-    // Get user's current fee rate
-    function getUserFeeRate(address user) external view returns (uint24) {
-        uint256 score = basicMainContract.contributionScores(user);
-        return _calculateTierFee(score);
+        // Return the dynamic fee (applies to all swaps, not just token0 -> token1)
+        return (IHooks.beforeSwap.selector, BeforeSwapDeltaLibrary.ZERO_DELTA, dynamicFee);
     }
 
     function afterSwap(address, PoolKey calldata, IPoolManager.SwapParams calldata, BalanceDelta, bytes calldata)
