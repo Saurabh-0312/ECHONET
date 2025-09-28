@@ -25,11 +25,6 @@ from uagents.crypto import Identity
 from cosmpy.crypto.keypairs import PrivateKey, PublicKey
 from mnemonic import Mnemonic
 
-# ======================================================================================
-# --- HARDCODED CONFIGURATION ---
-# ❗️ EDIT THE VALUES IN THIS SECTION ❗️
-# ======================================================================================
-
 # 1. The public URL of your central Flask server (the one running api.py)
 API_BASE_URL = "https://fetch-dev.onrender.com" # e.g., "https://echonet-api.onrender.com"
 
@@ -259,7 +254,7 @@ async def handle_sensor_data(ctx: Context, sender: str, msg: SensorData):
     registered_location = {"latitude": all_configs[msg.device_id]["latitude"], "longitude": all_configs[msg.device_id]["longitude"]}
     
     predicted_class, confidence = "ambient_noise", 0.99
-    ctx.logger.info(f"Using hardcoded ML result: class='{predicted_class}', confidence={confidence}")
+    # ctx.logger.info(f"Using hardcoded ML result: class='{predicted_class}', confidence={confidence}")
     
     event_id = hashlib.sha256(f"{msg.device_id}-{msg.timestamp}".encode()).hexdigest()
     event_local_group = get_local_peer_group(registered_location)
