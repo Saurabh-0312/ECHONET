@@ -1,4 +1,3 @@
-
 import sys
 import os
 import json
@@ -10,15 +9,14 @@ from datetime import datetime, timezone
 # This ensures the agent can find other project files and the config.
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(PROJECT_ROOT)
-# The Notary still needs the local registry to look up location details.
-SENSOR_REGISTRY_FILE = os.path.join(PROJECT_ROOT, "sensor_registry.json")
+# API endpoint to fetch sensor registry data from Flask app
+API_BASE_URL = "https://fetch-dev.onrender.com"
 
 # Import secrets and configuration for the Gist
-from config.settings import GITHUB_PAT, KNOWLEDGE_GRAPH_GIST_ID
+from config.settings import AGENTVERSE_API_KEY, GITHUB_PAT, KNOWLEDGE_GRAPH_GIST_ID
 
 # Import the schema for the incoming message
 from fetch_services.agents.schemas import FactCandidate
-from config.settings import AGENTVERSE_API_KEY
 
 # --- Agent Definition ---
 NOTARY_SEED = "notary_agent_super_secret_seed_phrase_for_echonet"
@@ -26,7 +24,8 @@ agent = Agent(
     name="EchoNetNotary",
     seed=NOTARY_SEED,
     # The port/endpoint are for local testing; on Agentverse, it will use its mailbox.
-    mailbox=f"{AGENTVERSE_API_KEY}@agentverse.ai"
+    port=8001,
+    mailbox=f"{AGENTVERSE_API_KEY}@agentverse.ai",
 )
 
 # --- State and Gist Helpers ---
@@ -63,20 +62,35 @@ def update_knowledge_graph_gist(new_content: str, ctx: Context):
         ctx.logger.error("Gist does not contain a 'knowledge_graph.metta' file. Please check your Gist setup.")
 
 
+def load_sensor_registry():
+    """
+    Fetches the sensor registry from the Flask API.
+    """
+    try:
+        response = requests.get(f"{API_BASE_URL}/registry", timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to load sensor registry from API: {e}")
+        return {}
+
 @agent.on_event("startup")
 async def startup(ctx: Context):
     """
-    On startup, the Notary loads the local sensor registry and initializes the
+    On startup, the Notary loads the sensor registry from Flask API and initializes the
     public knowledge base Gist, ensuring it starts from a clean slate.
     """
     global SENSOR_REGISTRY, WRITTEN_LOCATIONS, EVENT_COUNTER
     ctx.logger.info(f"Notary Agent starting up. Address: {agent.address}")
-    try:
-        with open(SENSOR_REGISTRY_FILE, 'r') as f:
-            SENSOR_REGISTRY = json.load(f)
-        ctx.logger.info(f"Successfully loaded sensor registry with {len(SENSOR_REGISTRY)} devices.")
-    except (FileNotFoundError, json.JSONDecodeError):
-        ctx.logger.warning("Local sensor registry not found or is empty.")
+    
+    # Load registry from Flask API instead of local file
+    SENSOR_REGISTRY = load_sensor_registry()
+    if SENSOR_REGISTRY:
+        # Count only actual devices (exclude _network_services)
+        device_count = len([k for k in SENSOR_REGISTRY.keys() if not k.startswith('_')])
+        ctx.logger.info(f"Successfully loaded sensor registry with {device_count} devices from API.")
+    else:
+        ctx.logger.warning("Could not load sensor registry from API or registry is empty.")
 
     # Initialize the public Gist with a header
     initial_content = "; EchoNet Shared Knowledge Graph\n; Managed by the Notary Agent.\n"
@@ -91,10 +105,13 @@ async def add_fact_to_kb(ctx: Context, sender: str, msg: FactCandidate):
     """
     Receives a validated fact and writes it to the PUBLIC knowledge graph Gist.
     """
-    global WRITTEN_LOCATIONS, EVENT_COUNTER
+    global SENSOR_REGISTRY, WRITTEN_LOCATIONS, EVENT_COUNTER
     
     data = msg.validated_event
     ctx.logger.info(f"Received fact candidate from worker for device {data.mac_address}")
+    
+    # Refresh sensor registry from API to get latest data
+    SENSOR_REGISTRY = load_sensor_registry()
     
     sensor_info = SENSOR_REGISTRY.get(data.mac_address)
     if not sensor_info:
@@ -125,4 +142,3 @@ if __name__ == "__main__":
     print(f"Starting Notary Agent...")
     print(f"Address: {agent.address}")
     agent.run()
-

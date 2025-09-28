@@ -36,10 +36,7 @@ agent = Agent(
     name="Decibal_Agent",
     seed=DECIBAL_AGENT_SEED,
     mailbox=f"{AGENTVERSE_API_KEY}@agentverse.ai",
-    #endpoint=["https://echonet-decibal-agent.onrender.com"],
-    publish_agent_details=True,
 )
-
 fund_agent_if_low(agent.wallet.address())
 
 # --- Knowledge Base Logic ---
