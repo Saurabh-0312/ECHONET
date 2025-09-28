@@ -132,8 +132,8 @@ def read_registry():
 
 # --- Agent & Peer Configuration ---
 try:
-    #MAC_ADDRESS = gma(interface="wlan0") or gma(interface="eth0") or gma()=
-    MAC_ADDRESS="00:1A:2B:3C:4D:5E"
+    MAC_ADDRESS = gma(interface="wlan0") or gma(interface="eth0") or gma()=
+    #MAC_ADDRESS="00:1A:2B:3C:4D:5E"
 
     if not MAC_ADDRESS: raise ValueError("getmac returned empty.")
     print(f"✅ Automatically detected MAC Address: {MAC_ADDRESS}")
