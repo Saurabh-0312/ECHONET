@@ -97,8 +97,9 @@ services:
       - certbot-www:/var/www/certbot
     networks:
       - echonet-network
-    # Leave entrypoint empty so `docker compose run certbot ...` can be used
-    entrypoint: ""
+    # Provide a harmless command so the service can be created in CI
+    # Use `docker compose run --rm certbot ...` to run certbot commands as usual.
+    command: ["/bin/sh", "-c", "tail -f /dev/null"]
     restart: unless-stopped
 
 networks:
