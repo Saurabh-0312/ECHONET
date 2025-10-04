@@ -8,6 +8,7 @@ services:
     container_name: echonet-frontend
     ports:
       - "80:80"
+      - "443:443"
     environment:
       - NODE_ENV=production
       - VITE_BACKEND_URL_DOCKER=http://backend:3001
