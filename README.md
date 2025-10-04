@@ -398,6 +398,65 @@ forge install
 forge build
 
 # Deploy to testnet
+
+## 🔐 Certbot / Let's Encrypt (HTTPS)
+
+This repository includes a simple Docker Compose friendly setup for obtaining and renewing Let's Encrypt certificates using the webroot plugin and the official Certbot image.
+
+What was added:
+- A `certbot` service in `docker-compose.yml` which mounts two named volumes:
+  - `certbot-www` mounted into containers at `/var/www/certbot` (webroot for ACME challenges)
+  - `certbot-etc` mounted into the certbot container at `/etc/letsencrypt` (stores certificates)
+- Nginx configs in `Frontend/nginx.conf` and `Server/nginx.conf` now serve `/.well-known/acme-challenge/` from `/var/www/certbot`.
+- A helper script `certbot-init.sh` to request certificates easily.
+
+Quick steps to obtain a certificate (example for `api.echonet.live`):
+
+1. Update Nginx `server_name` in `Frontend/nginx.conf` or `Server/nginx.conf` to your real domain. Ensure your DNS points to the host running Docker.
+
+2. Start only the frontend and certbot volumes so Nginx can serve ACME challenges:
+
+```bash
+# create and start containers (frontend provides the ACME challenge response)
+docker compose up -d frontend
+```
+
+3. Run the helper to request certs (replace domain and email):
+
+```bash
+./certbot-init.sh -d api.echonet.live -m you@example.com
+```
+
+If you need staging (for testing without rate limits):
+
+```bash
+./certbot-init.sh -d api.echonet.live -m you@example.com --staging
+```
+
+4. After successful issuance the certificates are stored in the `certbot-etc` Docker volume. To make nginx use them inside a container:
+
+- Update your Nginx SSL `ssl_certificate` and `ssl_certificate_key` paths to point to `/etc/letsencrypt/live/<your-domain>/fullchain.pem` and `/etc/letsencrypt/live/<your-domain>/privkey.pem` respectively inside the container (the `Server/nginx.conf` already does this for `api.echonet.live`).
+- Restart the nginx-containing service so it picks up the new certs, for example:
+
+```bash
+docker compose restart frontend
+# or if nginx runs in a different container
+docker compose restart backend
+```
+
+Renewal:
+- Use `docker compose run --rm certbot renew --webroot -w /var/www/certbot` on a schedule (cron or a host systemd timer). The certbot container needs access to both volumes; the webroot must be served by nginx during renewal.
+- Example one-liner to renew and reload nginx:
+
+```bash
+docker compose run --rm certbot renew --webroot -w /var/www/certbot && docker compose restart frontend
+```
+
+Security note: Keep the `certbot-etc` volume safe; it contains private keys. For production, consider mounting the volume to a host directory with careful permissions or use a secret manager.
+
+If you'd like, I can also:
+- Add a docker-compose one-shot task or Makefile target to automate issuance and renewal.
+- Add an example systemd timer or GitHub Actions workflow for renewals.
 forge script script/Script.s.sol --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast
 
 # Verify contracts (optional)

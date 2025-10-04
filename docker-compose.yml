@@ -16,6 +16,11 @@ services:
     restart: unless-stopped
     networks:
       - echonet-network
+    volumes:
+      # Webroot used by Certbot to respond to ACME challenges
+      - certbot-www:/var/www/certbot
+      # Let's Encrypt certs (so nginx inside this container can use them)
+      - certbot-etc:/etc/letsencrypt:ro
 
   # Backend Service - Main Node.js API Server
   backend:
@@ -38,6 +43,8 @@ services:
     volumes:
       - ./Server:/app
       - /app/node_modules
+      # Make certs available to backend/nginx if needed
+      - certbot-etc:/etc/letsencrypt:ro
     healthcheck:
       test: ["CMD", "node", "healthcheck.js"]
       interval: 30s
@@ -81,6 +88,26 @@ services:
       retries: 3
       start_period: 40s
 
+  # Certbot - used for obtaining and renewing Let's Encrypt certificates
+  certbot:
+    image: certbot/certbot:latest
+    container_name: echonet-certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    networks:
+      - echonet-network
+    # Leave entrypoint empty so `docker compose run certbot ...` can be used
+    entrypoint: ""
+    restart: unless-stopped
+
 networks:
   echonet-network:
     driver: bridge
+
+# Volumes for Let's Encrypt certificates and ACME webroot
+volumes:
+  certbot-www:
+    driver: local
+  certbot-etc:
+    driver: local
