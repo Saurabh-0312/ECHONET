@@ -141,29 +141,6 @@ For production deployment, consider:
 3. Using Docker Swarm or Kubernetes for orchestration
 4. Implementing health checks and monitoring
 
-### Notes about SSL certificates
-
-The container will generate a temporary self-signed certificate at `/etc/letsencrypt/live/echonet.live/` during startup if real Let's Encrypt certificates are not present. This prevents Nginx from failing to start when the certs are missing.
-
-To use real certificates with Certbot (recommended for production):
-
-1. Mount LetsEncrypt volumes into the container via your deployment (example in docker-compose):
-
-```yaml
-volumes:
-  - letsencrypt:/etc/letsencrypt
-  - certbot-www:/var/www/certbot
-```
-
-2. Run certbot on the host or in a separate container that writes certs into the mounted `letsencrypt` volume.
-
-3. After certs are obtained, reload the nginx container so it picks up the real certificates:
-
-```bash
-docker-compose restart frontend
-```
-
-
 ## Performance Optimization
 
 The Dockerfile includes several optimizations:
