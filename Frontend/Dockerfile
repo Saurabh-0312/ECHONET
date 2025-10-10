@@ -28,8 +28,15 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Copy nginx configuration (with backend proxy)
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# Expose port 80
-EXPOSE 80
+# Install openssl so we can generate a self-signed certificate at container start
+RUN apk add --no-cache openssl
+
+# Copy startup script(s) that run before nginx to ensure certs exist
+COPY docker-entrypoint.d/ /docker-entrypoint.d/
+RUN chmod +x /docker-entrypoint.d/*.sh || true
+
+# Expose ports 80 and 443
+EXPOSE 80 443
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
