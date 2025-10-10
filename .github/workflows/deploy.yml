@@ -55,4 +55,4 @@ jobs:
           '
 
       - name: Verify deployment
-        run: ssh ubuntu@170.205.61.163 'cd ECHONET && sudo docker-compose ps'
+        run: ssh ubuntu@170.205.61.163 'cd ECHONET && sudo docker compose ps'
