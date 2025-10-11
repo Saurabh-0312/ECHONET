@@ -19,8 +19,6 @@ RUN npm run build
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
 
-# Ensure openssl is available so the container can generate a self-signed cert
-RUN apk add --no-cache openssl
 
 # Remove default nginx website
 RUN rm -rf /usr/share/nginx/html/*
@@ -30,9 +28,7 @@ COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy nginx configuration (with backend proxy)
 COPY nginx.conf /etc/nginx/nginx.conf
-# Copy custom docker-entrypoint scripts (e.g., dummy cert generator)
-COPY docker-entrypoint.d /docker-entrypoint.d/
-RUN chmod -R 755 /docker-entrypoint.d || true
+# No custom entrypoint scripts required
 # Expose port 80
 EXPOSE 80
 
