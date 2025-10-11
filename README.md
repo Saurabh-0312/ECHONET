@@ -365,10 +365,10 @@ API_BASE_URL = "https://fetch-dev.onrender.com"
 AGENTVERSE_API_KEY = "your_agentverse_api_key_here"
 
 # 3. External data ingestion API
-EXTERNAL_INGEST_API_URL = "http://82.177.167.151:5001/ingest"
+EXTERNAL_INGEST_API_URL = "http://170.205.61.163:5001/ingest"
 
 # 4. Raw data collector API
-RAW_DATA_COLLECTOR_URL = "http://82.177.167.151:3001/api/sensor"
+RAW_DATA_COLLECTOR_URL = "http://170.205.61.163:3001/api/sensor"
 
 # 5. MQTT Broker (usually no change needed)
 MQTT_BROKER = "broker.hivemq.com"

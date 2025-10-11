@@ -33,7 +33,7 @@ const Market = () => {
 
     while (!success && attempts < 30) {
       try {
-        const response = await fetch("http://82.177.167.151:5002/market/purchase", {
+        const response = await fetch("http://170.205.61.163:5002/market/purchase", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

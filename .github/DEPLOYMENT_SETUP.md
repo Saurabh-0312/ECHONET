@@ -50,7 +50,7 @@ The workflow will:
 If you need to deploy manually:
 
 ```bash
-ssh -i ~/.ssh/cloud_rsa ubuntu@82.177.167.151
+ssh -i ~/.ssh/cloud_rsa ubuntu@170.205.61.163
 cd ECHONET
 git pull origin main
 sudo docker compose up --build -d --force-recreate

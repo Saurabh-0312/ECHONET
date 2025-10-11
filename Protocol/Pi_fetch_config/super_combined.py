@@ -30,8 +30,8 @@ from mnemonic import Mnemonic
 # ======================================================================================
 API_BASE_URL = "https://fetch-dev.onrender.com"
 AGENTVERSE_API_KEY = "YOUR_AGENTVERSE_API_KEY_HERE"
-EXTERNAL_INGEST_API_URL = "http://82.177.167.151:5001/ingest"
-RAW_DATA_COLLECTOR_URL = "http://82.177.167.151:3001/api/sensor"
+EXTERNAL_INGEST_API_URL = "http://170.205.61.163:5001/ingest"
+RAW_DATA_COLLECTOR_URL = "http://170.205.61.163:3001/api/sensor"
 MQTT_BROKER = "broker.hivemq.com"
 MQTT_PORT = 1883
 MQTT_TOPIC_PREFIX = "echonet/sensors"

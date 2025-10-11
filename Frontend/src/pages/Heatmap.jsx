@@ -22,9 +22,10 @@ function Heatmap() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  
   async function fetchData() {
     try {
-      const res = await fetch('http://82.177.167.151:5001/heatmap/data');
+      const res = await fetch('http://170.205.61.163:5001/heatmap/data');
       const json = await res.json();
       setData(json.data || []);
       setSubmittedCount(json.submitted || 0);

@@ -50,7 +50,7 @@ if [ $? -eq 0 ]; then
     echo "✅ Nginx setup complete!"
     echo ""
     echo "📋 Next steps:"
-    echo "1. Ensure your DNS A record points api.echonet.live to your server IP (82.177.167.151)"
+    echo "1. Ensure your DNS A record points api.echonet.live to your server IP (170.205.61.163)"
     echo "2. Run: sudo certbot --nginx -d api.echonet.live"
     echo "3. Start your Node.js application on port 3001"
     echo "4. Test: curl https://api.echonet.live/healthz"
