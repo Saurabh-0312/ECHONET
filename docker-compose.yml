@@ -16,7 +16,8 @@ services:
       - backend
     volumes:
       - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
+      # Mount host letsencrypt so certbot on host and nginx in container share the same files
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: unless-stopped
     networks:
       - echonet-network

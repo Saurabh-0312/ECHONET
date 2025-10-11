@@ -45,14 +45,25 @@ jobs:
 
       - name: Deploy to server
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@170.205.61.163 '
+          ssh -o StrictHostKeyChecking=no ubuntu@170.205.61.163 "
             set -e
             cd ECHONET &&
             git fetch origin &&
             git reset --hard origin/main &&
             sudo docker container prune &&
             sudo docker compose up --build -d --force-recreate
-          '
+
+            # If certificates are missing, attempt one-time issuance with certbot (docker)
+            if [ ! -f certbot/conf/live/echonet.live/fullchain.pem ]; then
+              echo \"Certificates not found — attempting one-time issuance with certbot (docker)...\"
+              sudo docker run --rm \
+                -v \"$(pwd)/certbot/www:/var/www/certbot\" \
+                -v \"$(pwd)/certbot/conf:/etc/letsencrypt\" \
+                  certbot/certbot certonly --webroot \
+                  --webroot-path=/var/www/certbot -d echonet.live --email "ekasatwal.work@gmail.com" --agree-tos --non-interactive || true
+              sudo docker compose restart frontend || true
+            fi
+          "
 
       - name: Verify deployment
         run: ssh ubuntu@170.205.61.163 'cd ECHONET && sudo docker compose ps'
