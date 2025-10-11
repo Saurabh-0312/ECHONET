@@ -39,7 +39,7 @@ function LandingPage() {
                 />
 
                 <p className='text-lg md:text-xl text-white/90 max-w-3xl'>
-                    Deploy a sensor, join the EchoNet DePIN on Solana, and start earning $ECHO by contributing to a global soundscape map.
+                    Deploy a sensor, join the EchoNet DePIN on Ethereum, and start earning $ECHO by contributing to a global soundscape map.
                 </p>
 
                 <div className='flex items-center gap-4 pt-4'>
