@@ -169,3 +169,8 @@ ganache-db/
 cache/
 artifacts/
 typechain/
+
+# Ignore hedara-microservice virtualenv
+hedara-microservice/.venv/
+hedara-microservice/*.pyc
+hedara-microservice/__pycache__/
