@@ -160,6 +160,9 @@ Thumbs.db
 *.p12
 *.pfx
 
+# Certbot data (do not commit)
+certbot/
+
 # Blockchain specific
 ganache-db/
 .openzeppelin/
