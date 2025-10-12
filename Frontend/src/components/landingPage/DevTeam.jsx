@@ -1,6 +1,6 @@
 import React from 'react';
 import { WavyBackground } from '../ui/wavy-background';
-import teamImage from '../../assets/team1.png';
+import teamImage from '../../assets/team1.jpeg';
 
 function DevTeam() {
   return (
