@@ -1,4 +1,4 @@
-# ECHONET 🌍
+# ECHONET 
 
 **A comprehensive decentralized environmental monitoring ecosystem** that combines IoT sensors, multi-blockchain protocols, AI/ML services, and distributed computing to create a transparent, incentivized network for environmental data collection, verification, and analysis.
 
